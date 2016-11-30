@@ -9,6 +9,8 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <ga/GASimpleGA.h>	// we're going to use the simple GA
+#include <ga/GA1DArrayGenome.h>
 
 using namespace std;
 
@@ -120,6 +122,11 @@ public:
      * @return a state of the check (i.e. FEASIBLE if the solution is feasible)
      */
     eFeasibleState isFeasible(string path);
+
+    void prova(vector<double>& stat, int timeLimit = - 1);
+
+    float Objective(GAGenome& g);
 };
+
 
 #endif //COIOTE_HEURISTIC_HEURISTIC_H
