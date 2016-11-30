@@ -146,6 +146,7 @@ void Heuristic::solveFast(vector<double>& stat, int timeLimit) {
 }
 
 void Heuristic::prova(vector<double>& stat, int timeLimit){
+
     double objFun=0;
     clock_t tStart = clock();
 
@@ -162,7 +163,8 @@ void Heuristic::prova(vector<double>& stat, int timeLimit){
     float pcross = 0.5;
 
 
-    GA1DArrayGenome<int> genome((unsigned int)length, (GAGenome::Evaluator) &this->Objective);     // create a genome
+    GA1DArrayGenome<int> genome(length, (GAGenome::Evaluator) & Objective);     // create a genome
+
 
     GASimpleGA ga(genome);// create the GA
 
@@ -192,7 +194,53 @@ void Heuristic::prova(vector<double>& stat, int timeLimit){
     hasSolution = true;
 
 
+
+
+
 }
+
+//float Heuristic::Objective(GAGenome& g){
+//    GA1DArrayGenome<int> & genome = (GA1DArrayGenome<int> &)g;
+//
+//    float score = 0.0;
+//
+//    for (int i = 0; i < Heuristic::nCells; i++)
+//        for (int j = 0; j < Heuristic::nCells; j++)
+//            for (int m = 0; m < Heuristic::nCustomerTypes; m++)
+//                for (int t = 0; t < Heuristic::nTimeSteps; t++)
+//                  score +=  genome.gene(i + j*Heuristic::nCells + m*Heuristic::nCells*Heuristic::nCustomerTypes + t*Heuristic::nCells*Heuristic::nCustomerTypes*Heuristic::nTimeSteps) * Heuristic::problem.costs[i][j][m][t];
+//
+//    // Demand
+//    bool feasible = true;
+//    int expr;
+//    for (int i = 0; i < Heuristic::nCells; i++) {
+//        expr = 0;
+//        for (int j = 0; j < Heuristic::nCells; j++)
+//            for (int m = 0; m < Heuristic::nCustomerTypes; m++)
+//                for (int t = 0; t < Heuristic::nTimeSteps; t++)
+//                    expr += Heuristic::problem.n[m] * genome.gene(j + i*Heuristic::nCells + m*Heuristic::nCells*Heuristic::nCustomerTypes + t*Heuristic::nCells*Heuristic::nCustomerTypes*Heuristic::nTimeSteps);
+//        if (expr < Heuristic::problem.activities[i])
+//            feasible = false;
+//    }
+//
+//    // Max Number of users
+//    for (int i = 0; i < Heuristic::nCells; i++)
+//        for (int m = 0; m < Heuristic::nCustomerTypes; m++)
+//            for (int t = 0; t < Heuristic::nTimeSteps; t++) {
+//                expr = 0;
+//                for (int j = 0; j < Heuristic::nCells; j++)
+//                    expr += genome.gene(i + j*Heuristic::nCells + m*Heuristic::nCells*Heuristic::nCustomerTypes + t*Heuristic::nCells*Heuristic::nCustomerTypes*Heuristic::nTimeSteps);
+//                if (expr > Heuristic::problem.usersCell[i][m][t])
+//                    feasible = false;
+//            }
+//
+//    if(!feasible)
+//        return 0;
+//
+//
+//    return 1/score;
+//
+//}
 
 float Heuristic::Objective(GAGenome& g){
     GA1DArrayGenome<int> & genome = (GA1DArrayGenome<int> &)g;
@@ -203,7 +251,7 @@ float Heuristic::Objective(GAGenome& g){
         for (int j = 0; j < nCells; j++)
             for (int m = 0; m < nCustomerTypes; m++)
                 for (int t = 0; t < nTimeSteps; t++)
-                  score +=  genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) * problem.costs[i][j][m][t];
+                    score +=  genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) * problem.costs[i][j][m][t];
 
     // Demand
     bool feasible = true;

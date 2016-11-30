@@ -11,6 +11,8 @@
 #include <map>
 #include <ga/GASimpleGA.h>	// we're going to use the simple GA
 #include <ga/GA1DArrayGenome.h>
+#include <ga/GA1DArrayGenome.c>
+#include <ga/ga.h>
 
 using namespace std;
 
@@ -47,22 +49,22 @@ private:
     /**
      * Number of periods
      */
-    int nTimeSteps;
+     int nTimeSteps;
 
     /**
      * Number of customer types
      */
-    int nCustomerTypes;
+     int nCustomerTypes;
 
     /**
      * Number of cells
      */
-    int nCells;
+     int nCells;
 
     /**
      * Problem structure for parameters
      */
-    Data problem;
+     Data problem;
 
     /**
      * Flag equals to true if the problems has a solution
@@ -72,7 +74,7 @@ private:
     /**
      * Variables of the problem (X in the model)
      */
-    int**** solution;
+     int**** solution;
 
 public:
     /**
@@ -125,7 +127,7 @@ public:
 
     void prova(vector<double>& stat, int timeLimit = - 1);
 
-    float Objective(GAGenome& g);
+     static float Objective(GAGenome& g);
 };
 
 
