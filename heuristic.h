@@ -127,7 +127,7 @@ public:
 
     void prova(vector<double>& stat, int timeLimit = - 1);
 
-     static float Objective(GAGenome& g);
+    float Objective(GAGenome& g);
 };
 
 
