@@ -1,5 +1,7 @@
 #include <list>
 #include <iostream>
+#include <stdio.h>
+#include <cmath>
 #include <cstring>
 #include "utils.h"
 #include "heuristic.h"
@@ -75,10 +77,10 @@ int main(int argc,char *argv[]){
                         solution[i][j][m][t] = 0;
 
         int length = nCells*nCells*nCustomerTypes*nTimeSteps;
-        int popsize  = 30;
-        int ngen     = 20000;
-        float pmut   = 0.9;
-        float pcross = 0.1;
+        int popsize  = 100;
+        int ngen     = 2000;
+        float pmut   = 0.3;
+        float pcross = 0.7;
 
 
 
@@ -95,7 +97,7 @@ int main(int argc,char *argv[]){
       //  GARealAlleleSet alleles(0,30,1,GAAllele::INCLUSIVE,GAAllele::EXCLUSIVE);
 
         GARealGenome genome(alleles, Objective);     // create a genome
-        genome.initializer(GARealGenome::UniformInitializer);
+        genome.initializer(Initializer);
         genome.mutator(GARealGenome::FlipMutator);
         genome.crossover(GARealGenome::UniformCrossover);
 
@@ -199,7 +201,7 @@ float Objective(GAGenome& g){
             }
 
     if(!feasible)
-        return 10000;
+        return 100000000;
 	
 	
 
@@ -208,13 +210,55 @@ float Objective(GAGenome& g){
 
 }
 
+//void Initializer(GAGenome& g)
+//{
+//    GA1DArrayGenome<int>& genome = (GA1DArrayGenome<int>&)g;
+//    for (int i = 0; i < nCells; i++)
+//        for (int j = 0; j < nCells; j++)
+//            for (int m = 0; m < nCustomerTypes; m++)
+//                for (int t = 0; t < nTimeSteps; t++)
+//                    genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps,  GARandomInt(0, problem.activities[j]) ) ;
+//
+//}
+
 void Initializer(GAGenome& g)
 {
-    GA1DArrayGenome<int>& genome = (GA1DArrayGenome<int>&)g;
+    GARealGenome & genome = (GARealGenome &)g;
+
     for (int i = 0; i < nCells; i++)
         for (int j = 0; j < nCells; j++)
             for (int m = 0; m < nCustomerTypes; m++)
                 for (int t = 0; t < nTimeSteps; t++)
-                    genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps,  GARandomInt(0, problem.activities[j]) ) ;
+                    genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps,  0 ) ;
+
+    for (int i = 0; i < nCells; i++) {
+        int demand = problem.activities[i];
+
+        bool notSatisfied = true;
+
+        while (notSatisfied) {
+            int j = GARandomInt(0, nCells-1);
+            int m = GARandomInt(0, nCustomerTypes-1);
+            int t = GARandomInt(0, nTimeSteps-1);
+
+            if (i != j) {
+                if (demand > problem.n[m] * problem.usersCell[j][m][t]) {
+                    genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps, problem.usersCell[j][m][t]);
+                    problem.usersCell[j][m][t] -= genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
+                }
+                else {
+                    float saved = genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
+                    genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps,  saved + floor(demand / problem.n[m]));
+                    notSatisfied = false;
+                }
+                if (genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) != 0) {
+                    //objFun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+                }
+                demand -= problem.n[m]*genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
+            }
+
+        }
+    }
+
 
 }
