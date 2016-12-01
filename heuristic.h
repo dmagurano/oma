@@ -9,10 +9,8 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <ga/GASimpleGA.h>	// we're going to use the simple GA
-#include <ga/GA1DArrayGenome.h>
-#include <ga/GA1DArrayGenome.c>
-#include <ga/ga.h>
+#include <ga/GASimpleGA.h>
+
 
 using namespace std;
 
@@ -45,7 +43,7 @@ enum eFeasibleState {
 };
 
 class Heuristic{
-private:
+public:
     /**
      * Number of periods
      */
