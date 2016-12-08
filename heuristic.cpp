@@ -145,145 +145,119 @@ void Heuristic::solveFast(vector<double>& stat, int timeLimit) {
     hasSolution=true;
 }
 
-//void Heuristic::prova(vector<double>& stat, int timeLimit){
-//
-//    double objFun=0;
-//    clock_t tStart = clock();
-//
-//    for (int i = 0; i < nCells; i++)
-//        for (int j = 0; j < nCells; j++)
-//            for (int m = 0; m < nCustomerTypes; m++)
-//                for (int t = 0; t < nTimeSteps; t++)
-//                    solution[i][j][m][t] = 0;
-//
-//    int length = nCells*nCells*nCustomerTypes*nTimeSteps;
-//    int popsize  = 30;
-//    int ngen     = 400;
-//    float pmut   = 0.5;
-//    float pcross = 0.5;
-//
-//
-//    GA1DArrayGenome<int> genome(length, (Objective);     // create a genome
-//
-//
-//    GASimpleGA ga(genome);// create the GA
-//
-//    ga.populationSize(popsize);
-//    ga.nGenerations(ngen);
-//    ga.pMutation(pmut);
-//    ga.pCrossover(pcross);
-//
-//    ga.evolve();
-//
-//    GA1DArrayGenome<int> & result = (GA1DArrayGenome<int> &)ga.statistics().bestIndividual();
-//    for (int i = 0; i < nCells; i++)
-//        for (int j = 0; j < nCells; j++)
-//            for (int m = 0; m < nCustomerTypes; m++)
-//                for (int t = 0; t < nTimeSteps; t++)
-//                    objFun +=  result.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) * problem.costs[i][j][m][t];
-//
-//    stat.push_back(objFun);
-//    stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
-//
-//    for (int i = 0; i < nCells; i++)
-//        for (int j = 0; j < nCells; j++)
-//            for (int m = 0; m < nCustomerTypes; m++)
-//                for (int t = 0; t < nTimeSteps; t++)
-//                    solution[i][j][m][t] =  result.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) ;
-//
-//    hasSolution = true;
-//
-//
-//
-//
-//
-//}
+float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data problem) {
 
-//float Heuristic::Objective(GAGenome& g){
-//    GA1DArrayGenome<int> & genome = (GA1DArrayGenome<int> &)g;
-//
-//    float score = 0.0;
-//
-//    for (int i = 0; i < Heuristic::nCells; i++)
-//        for (int j = 0; j < Heuristic::nCells; j++)
-//            for (int m = 0; m < Heuristic::nCustomerTypes; m++)
-//                for (int t = 0; t < Heuristic::nTimeSteps; t++)
-//                  score +=  genome.gene(i + j*Heuristic::nCells + m*Heuristic::nCells*Heuristic::nCustomerTypes + t*Heuristic::nCells*Heuristic::nCustomerTypes*Heuristic::nTimeSteps) * Heuristic::problem.costs[i][j][m][t];
-//
-//    // Demand
-//    bool feasible = true;
-//    int expr;
-//    for (int i = 0; i < Heuristic::nCells; i++) {
-//        expr = 0;
-//        for (int j = 0; j < Heuristic::nCells; j++)
-//            for (int m = 0; m < Heuristic::nCustomerTypes; m++)
-//                for (int t = 0; t < Heuristic::nTimeSteps; t++)
-//                    expr += Heuristic::problem.n[m] * genome.gene(j + i*Heuristic::nCells + m*Heuristic::nCells*Heuristic::nCustomerTypes + t*Heuristic::nCells*Heuristic::nCustomerTypes*Heuristic::nTimeSteps);
-//        if (expr < Heuristic::problem.activities[i])
-//            feasible = false;
-//    }
-//
-//    // Max Number of users
-//    for (int i = 0; i < Heuristic::nCells; i++)
-//        for (int m = 0; m < Heuristic::nCustomerTypes; m++)
-//            for (int t = 0; t < Heuristic::nTimeSteps; t++) {
-//                expr = 0;
-//                for (int j = 0; j < Heuristic::nCells; j++)
-//                    expr += genome.gene(i + j*Heuristic::nCells + m*Heuristic::nCells*Heuristic::nCustomerTypes + t*Heuristic::nCells*Heuristic::nCustomerTypes*Heuristic::nTimeSteps);
-//                if (expr > Heuristic::problem.usersCell[i][m][t])
-//                    feasible = false;
-//            }
-//
-//    if(!feasible)
-//        return 0;
-//
-//
-//    return 1/score;
-//
-//}
+    clock_t tStart = clock();
 
-//float Heuristic::Objective(GAGenome& g){
-//    GA1DArrayGenome<int> & genome = (GA1DArrayGenome<int> &)g;
-//
-//    float score = 0.0;
-//
-//    for (int i = 0; i < nCells; i++)
-//        for (int j = 0; j < nCells; j++)
-//            for (int m = 0; m < nCustomerTypes; m++)
-//                for (int t = 0; t < nTimeSteps; t++)
-//                    score +=  genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) * problem.costs[i][j][m][t];
-//
-//    // Demand
-//    bool feasible = true;
-//    int expr;
-//    for (int i = 0; i < nCells; i++) {
-//        expr = 0;
-//        for (int j = 0; j < nCells; j++)
-//            for (int m = 0; m < nCustomerTypes; m++)
-//                for (int t = 0; t < nTimeSteps; t++)
-//                    expr += problem.n[m] * genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
-//        if (expr < problem.activities[i])
-//            feasible = false;
-//    }
-//
-//    // Max Number of users
-//    for (int i = 0; i < nCells; i++)
-//        for (int m = 0; m < nCustomerTypes; m++)
-//            for (int t = 0; t < nTimeSteps; t++) {
-//                expr = 0;
-//                for (int j = 0; j < nCells; j++)
-//                    expr += genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
-//                if (expr > problem.usersCell[i][m][t])
-//                    feasible = false;
-//            }
-//
-//    if(!feasible)
-//        return 0;
-//
-//
-//    return 1/score;
-//
-//}
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
+
+    int  objfun = 0;
+    bool feasible = true;
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    // per ogni dest:
+    for (; it!=end; it++)
+    {
+        j = *it;
+        notSatisfied = true;
+        int demand = problem.activities[j];
+        // w -> dim|i-j|
+        for (w=1; w<nCells && notSatisfied; w++)
+        {
+            if (j-w < 0 && j+w > nCells)
+            {
+                feasible = false;
+                break;
+            }     // ----------------------------- not feasible
+            for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
+            {
+                if (demand < problem.n[m])
+                    continue;
+
+                for (t=0; t<nTimeSteps && notSatisfied; t++)
+                {
+
+                    if (!(j-w < 0) && demand > 0)
+                    {
+                        i = j-w;
+                        if (demand>problem.usersCell[i][m][t]*problem.n[m])
+                        {
+                            // le richieste sono maggiori dei task che possono soddisfare quegli utenti
+                            // quindi mandiamoli tutti
+
+                            solution[i][j][m][t] += problem.usersCell[i][m][t];
+                            problem.usersCell[i][m][t] -= solution[i][j][m][t];
+                            demand -= solution[i][j][m][t]*problem.n[m];
+
+                        }
+                        else
+                        {
+                            // altrimenti mandiamo solo quelli necessari (demand/task)
+                            int sent = demand / problem.n[m];
+                            solution[i][j][m][t] += sent;
+                            problem.usersCell[i][m][t] -= sent;
+                            demand -= sent*problem.n[m];
+                            //notSatisfied = false;
+                            //continue;
+                        }
+                    }
+                    if (!(j+w >= nCells) && demand > 0)
+                    {
+                        i = j+w;
+                        if (demand>problem.usersCell[i][m][t]*problem.n[m])
+                        {
+                            // le richieste sono maggiori dei task che possono soddisfare quegli utenti
+                            // quindi mandiamoli tutti
+
+                            solution[i][j][m][t] += problem.usersCell[i][m][t];
+                            problem.usersCell[i][m][t] -= solution[i][j][m][t];
+                            demand -= solution[i][j][m][t]*problem.n[m];
+                        }
+                        else
+                        {
+                            // altrimenti mandiamo solo quelli necessari (demand/task)
+                            int sent = demand / problem.n[m];
+                            solution[i][j][m][t] += sent;
+                            problem.usersCell[i][m][t] -= sent;
+                            demand -= sent*problem.n[m];
+                            //notSatisfied = false;
+                            //continue;
+                        }
+                    }
+
+                    // controllo se ho soddisfatto le richieste
+                    if(demand == 0)
+                        notSatisfied = false;
+                }
+            }
+        }
+    }
+
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (!feasible)
+        cout << "Not feasible solution!" << endl;
+    stat.push_back(objfun);
+    stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
+
+    hasSolution=true;
+
+
+    return (float) floor(objfun);
+}
 
 void Heuristic::writeKPI(string path, string instanceName, vector<double> stat){
     if (!hasSolution)

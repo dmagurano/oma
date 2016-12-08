@@ -7,18 +7,21 @@
 #include "heuristic.h"
 
 #include <ga/ga.h>
-#define INSTANTIATE_REAL_GENOME
-#include <ga/GARealGenome.h>
+#include <ga/std_stream.h>
+
+#define cout STD_COUT
+#define ostream STD_OSTREAM
+
 using namespace std;
 
 /////////////////////////////////////////////
 float Objective(GAGenome& g);
 void Initializer(GAGenome& g);
 
+Heuristic _heuristic;
 int nTimeSteps;
 int nCustomerTypes;
 int nCells;
-Data problem;
 int**** solution;
 
 /////////////////////////////////////////
@@ -54,88 +57,91 @@ int main(int argc,char *argv[]){
 
 	if(!_test) {
 		// Read the instance file
-		Heuristic _heuristic(_inPath);
+		_heuristic = Heuristic(_inPath);
 		// Solve the problem
 		vector<double> stat;
-		//_heuristic.prova(stat);
+
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         nTimeSteps = _heuristic.nTimeSteps;
         nCustomerTypes = _heuristic.nCustomerTypes;
         nCells = _heuristic.nCells;
-        problem = _heuristic.problem;
         solution = _heuristic.solution;
 
-        double objFun=0;
-
-
-        for (int i = 0; i < nCells; i++)
-            for (int j = 0; j < nCells; j++)
-                for (int m = 0; m < nCustomerTypes; m++)
-                    for (int t = 0; t < nTimeSteps; t++)
-                        solution[i][j][m][t] = 0;
-
-        int length = nCells*nCells*nCustomerTypes*nTimeSteps;
-        int popsize  = 10;
+        int popsize  = 20;
         int ngen     = 1000000;
-        float pmut   = 0.001;
-        float pcross = 0.999;
+        float pmut   = 0.5;
+        float pcross = 0.5;
 
 
-
-       GARealAlleleSetArray alleles;
-
-
-
-       for (int i = 0; i < nCells; i++)
-           for (int j = 0; j < nCells; j++)
-               for (int m = 0; m < nCustomerTypes; m++)
-                   for (int t = 0; t < nTimeSteps; t++)
-                       alleles.add(0, (float)problem.activities[j], 1 );
-
-      //  GARealAlleleSet alleles(0,30,1,GAAllele::INCLUSIVE,GAAllele::EXCLUSIVE);
-
-        GARealGenome genome(alleles, Objective);     // create a genome
+        GAListGenome<int> genome(Objective);
         genome.initializer(Initializer);
-        genome.mutator(GARealGenome::FlipMutator);
-        genome.crossover(GARealGenome::OnePointCrossover);
+        genome.mutator(GAListGenome<int>::SwapMutator);
+        genome.crossover(GAListGenome<int>::PartialMatchCrossover);
 
-        GASimpleGA ga(genome);// create the GA
-        
+
+//        GASimpleGA ga(genome);// create the GA
+//
+//        ga.minimize();
+//        ga.populationSize(popsize);
+//        ga.nGenerations(ngen);
+//        ga.pMutation(pmut);
+//        ga.pCrossover(pcross);
+
+        GASteadyStateGA ga(genome);
+
+        GASigmaTruncationScaling trunc;
+        ga.scaling(trunc);
+        ga.set(gaNpopulationSize, 20);
+        ga.set(gaNpCrossover, 0.6);
+        ga.set(gaNpMutation, 0.4);
+        ga.set(gaNnGenerations, 10000);
+        ga.set(gaNpReplacement, 0.4);
         ga.minimize();
-        ga.populationSize(popsize);
-        ga.nGenerations(ngen);
-        ga.pMutation(pmut);
-        ga.pCrossover(pcross);
 
         clock_t tStart = clock();
 
         ga.initialize();
 
-        while( ((double)(clock() - tStart) / CLOCKS_PER_SEC ) <= 5.0 ){
+        while( ((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 ){
             ga.step();
         }
-		
-		cout << "best individual is " << ga.statistics().bestIndividual() << "\n\n";
-		cout << ga.statistics() << "\n";
-		
 
-        GARealGenome & result = (GARealGenome &)ga.statistics().bestIndividual();
-        for (int i = 0; i < nCells; i++)
-            for (int j = 0; j < nCells; j++)
-                for (int m = 0; m < nCustomerTypes; m++)
-                    for (int t = 0; t < nTimeSteps; t++)
-                        objFun +=  result.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) * problem.costs[i][j][m][t];
-
-        stat.push_back(objFun);
         stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
 
-        for (int i = 0; i < nCells; i++)
-            for (int j = 0; j < nCells; j++)
-                for (int m = 0; m < nCustomerTypes; m++)
-                    for (int t = 0; t < nTimeSteps; t++)
-                        solution[i][j][m][t] =  result.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) ;
+		cout << "best individual is " << ga.statistics().bestIndividual() << "\n\n";
+		cout << ga.statistics() << "\n";
+
+        for(int i=0; i<ga.statistics().bestPopulation().size(); i++){
+            genome = ga.statistics().bestPopulation().individual(i);
+            cout << genome << "\n";
+        }
+
+        int objFun = ga.statistics().bestIndividual().score();
+
+        stat.push_back(objFun);
+
+        Data problem = _heuristic.getProblem();
+        GAListGenome<int>  & result = (GAListGenome<int>  &)ga.statistics().bestIndividual();
+
+        GAListIter<int> iter(result);
+        vector<int> order;
+        int *cur, *head;
+        if((head=iter.head()) != NULL) order.push_back(*head);
+        for(cur=iter.next(); cur && cur != head; cur=iter.next())
+           order.push_back(*cur);
+
+        std::vector<int>::iterator it = order.begin();
+        std::vector<int>::iterator end = order.end();
+        // per ogni dest:
+        for (; it!=end; it++)
+        {
+            cout << *it << " " ;
+        }
+
+        _heuristic.solveGreedy(stat,order,problem);
+
 
         _heuristic.hasSolution = true;
 
@@ -172,99 +178,157 @@ int main(int argc,char *argv[]){
 }
 
 float Objective(GAGenome& g){
-    GARealGenome & genome = (GARealGenome &)g;
 
-    float score = 0.0;
+    GAListGenome<int> & genome = (GAListGenome<int> &)g;
 
-    for (int i = 0; i < nCells; i++)
-        for (int j = 0; j < nCells; j++)
-            for (int m = 0; m < nCustomerTypes; m++)
-                for (int t = 0; t < nTimeSteps; t++)
-                    score +=  genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) * problem.costs[i][j][m][t];
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
 
-//    // Demand
-//    bool feasible = true;
-//    int expr;
-//    for (int i = 0; i < nCells; i++) {
-//        expr = 0;
-//        for (int j = 0; j < nCells; j++)
-//            for (int m = 0; m < nCustomerTypes; m++)
-//                for (int t = 0; t < nTimeSteps; t++)
-//                    expr += problem.n[m] * genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
-//        if (expr < problem.activities[i])
-//            feasible = false;
-//    }
-//
-//    // Max Number of users
-//    for (int i = 0; i < nCells; i++)
-//        for (int m = 0; m < nCustomerTypes; m++)
-//            for (int t = 0; t < nTimeSteps; t++) {
-//                expr = 0;
-//                for (int j = 0; j < nCells; j++)
-//                    expr += genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
-//                if (expr > problem.usersCell[i][m][t])
-//                    feasible = false;
-//            }
-//
-//    if(!feasible)
-//        return 100000000;
-	
-	
+    int  objfun = 0;
+    bool feasible = true;
 
+    Data problem = _heuristic.getProblem();
 
-    return score ;
+    GAListIter<int> iter(genome);
+    vector<int> indexes;
+    int *cur, *head;
+    if((head=iter.head()) != NULL) indexes.push_back(*head);
+    for(cur=iter.next(); cur && cur != head; cur=iter.next())
+        indexes.push_back(*cur);
 
-}
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    // per ogni dest:
+    for (; it!=end; it++)
+    {
+        j = *it;
+        notSatisfied = true;
+        int demand = problem.activities[j];
+        // w -> dim|i-j|
+        for (w=1; w<nCells && notSatisfied; w++)
+        {
+            if (j-w < 0 && j+w > nCells)
+            {
+                feasible = false;
+                break;
+            }     // ----------------------------- not feasible
+            for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
+            {
+                if (demand < problem.n[m])
+                    continue;
 
-//void Initializer(GAGenome& g)
-//{
-//    GA1DArrayGenome<int>& genome = (GA1DArrayGenome<int>&)g;
-//    for (int i = 0; i < nCells; i++)
-//        for (int j = 0; j < nCells; j++)
-//            for (int m = 0; m < nCustomerTypes; m++)
-//                for (int t = 0; t < nTimeSteps; t++)
-//                    genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps,  GARandomInt(0, problem.activities[j]) ) ;
-//
-//}
+                for (t=0; t<nTimeSteps && notSatisfied; t++)
+                {
 
-void Initializer(GAGenome& g)
-{
-    GARealGenome & genome = (GARealGenome &)g;
+                    if (!(j-w < 0) && demand > 0)
+                    {
+                        i = j-w;
+                        if (demand>problem.usersCell[i][m][t]*problem.n[m])
+                        {
+                            // le richieste sono maggiori dei task che possono soddisfare quegli utenti
+                            // quindi mandiamoli tutti
 
-    for (int i = 0; i < nCells; i++)
-        for (int j = 0; j < nCells; j++)
-            for (int m = 0; m < nCustomerTypes; m++)
-                for (int t = 0; t < nTimeSteps; t++)
-                    genome.gene(i + j*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps,  0 ) ;
+                            solution[i][j][m][t] += problem.usersCell[i][m][t];
+                            problem.usersCell[i][m][t] -= solution[i][j][m][t];
+                            demand -= solution[i][j][m][t]*problem.n[m];
 
-    for (int i = 0; i < nCells; i++) {
-        int demand = problem.activities[i];
+                        }
+                        else
+                        {
+                            // altrimenti mandiamo solo quelli necessari (demand/task)
+                            int sent = demand / problem.n[m];
+                            solution[i][j][m][t] += sent;
+                            problem.usersCell[i][m][t] -= sent;
+                            demand -= sent*problem.n[m];
+                            //notSatisfied = false;
+                            //continue;
+                        }
+                    }
+                    if (!(j+w >= nCells) && demand > 0)
+                    {
+                        i = j+w;
+                        if (demand>problem.usersCell[i][m][t]*problem.n[m])
+                        {
+                            // le richieste sono maggiori dei task che possono soddisfare quegli utenti
+                            // quindi mandiamoli tutti
 
+                            solution[i][j][m][t] += problem.usersCell[i][m][t];
+                            problem.usersCell[i][m][t] -= solution[i][j][m][t];
+                            demand -= solution[i][j][m][t]*problem.n[m];
+                        }
+                        else
+                        {
+                            // altrimenti mandiamo solo quelli necessari (demand/task)
+                            int sent = demand / problem.n[m];
+                            solution[i][j][m][t] += sent;
+                            problem.usersCell[i][m][t] -= sent;
+                            demand -= sent*problem.n[m];
+                            //notSatisfied = false;
+                            //continue;
+                        }
+                    }
 
-        bool notSatisfied = true;
-        while (notSatisfied) {
-            int j = GARandomInt(0, nCells-1);
-            int m = GARandomInt(0, nCustomerTypes-1);
-            int t = GARandomInt(0, nTimeSteps-1);
-
-            if (i != j) {
-                if (demand > problem.n[m] * problem.usersCell[j][m][t]) {
-                    genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps, problem.usersCell[j][m][t]);
-                    problem.usersCell[j][m][t] -= genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
+                    // controllo se ho soddisfatto le richieste
+                    if(demand == 0)
+                        notSatisfied = false;
                 }
-                else {
-                    int saved = genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
-                    genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps,  saved + floor(demand / problem.n[m]));
-                    notSatisfied = false;
-                }
-                if (genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps) != 0) {
-                    //objFun += solution[j][i][m][t] * problem.costs[j][i][m][t];
-                }
-                demand -= problem.n[m]*genome.gene(j + i*nCells + m*nCells*nCustomerTypes + t*nCells*nCustomerTypes*nTimeSteps);
             }
-
         }
     }
 
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
 
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (!feasible){
+        objfun = 10000000;
+    }
+
+
+
+
+    return (float) floor(objfun);
+
+
+}
+
+void Initializer(GAGenome& g)
+{
+
+    GAListGenome<int> &child=(GAListGenome<int> &)g;
+//    while(child.head()) child.destroy(); // destroy any pre-existing list
+
+    int listLength = _heuristic.getCells();
+    Data instance = _heuristic.getProblem();
+    int* tasks = instance.activities;
+    for(int i=0; i<listLength; i++){
+        if(tasks[i] > 0)
+            child.insert(i);
+    }
+
+    int n = child.size();
+
+
+    for(int j=0; j<n; j++)
+        child.swap(GARandomInt(0,n-1), GARandomInt(0,n-1));
+}
+
+
+template<> int
+GAListGenome<int>::write(ostream & os) const
+{
+    int *cur, *head;
+    GAListIter<int> tmpiter(*this);
+    if((head=tmpiter.head()) != 0) os << *head << " ";
+    for(cur=tmpiter.next(); cur && cur != head; cur=tmpiter.next())
+        os << *cur << " ";
+    return os.fail() ? 1 : 0;
 }

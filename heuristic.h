@@ -9,8 +9,6 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <ga/GASimpleGA.h>
-
 
 using namespace std;
 
@@ -47,22 +45,22 @@ public:
     /**
      * Number of periods
      */
-     int nTimeSteps;
+    int nTimeSteps;
 
     /**
      * Number of customer types
      */
-     int nCustomerTypes;
+    int nCustomerTypes;
 
     /**
      * Number of cells
      */
-     int nCells;
+    int nCells;
 
     /**
      * Problem structure for parameters
      */
-     Data problem;
+    Data problem;
 
     /**
      * Flag equals to true if the problems has a solution
@@ -72,7 +70,7 @@ public:
     /**
      * Variables of the problem (X in the model)
      */
-     int**** solution;
+    int**** solution;
 
 public:
     /**
@@ -116,6 +114,7 @@ public:
      */
     void writeSolution(string path);
 
+    float solveGreedy(vector<double>& stat, vector<int> indexes, Data problem);
     /**
      * Check the feasibility of the problem
      * @param path path of the solution file
@@ -123,10 +122,14 @@ public:
      */
     eFeasibleState isFeasible(string path);
 
-    void prova(vector<double>& stat, int timeLimit = - 1);
+    int getCells(){
+        return nCells;
+    };
 
-    float Objective(GAGenome& g);
+    Data getProblem(){
+        return problem;
+    }
+
 };
-
 
 #endif //COIOTE_HEURISTIC_HEURISTIC_H
