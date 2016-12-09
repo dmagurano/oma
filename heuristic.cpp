@@ -7,6 +7,11 @@
 
 using namespace std;
 
+int myrand1(int i) {
+    //srand(unsigned(time(0)));
+    return rand()%i;
+}
+
 Heuristic::Heuristic(string path){
     this->hasSolution = false;
     string line;
@@ -116,7 +121,9 @@ float Heuristic::solveGreedy(vector<double>& stat, vector<int> indexes, Data pro
             for (m = 0; m < nCustomerTypes; m++)
                 for (t = 0; t < nTimeSteps; t++)
                     solution[i][j][m][t] = 0;
-
+    auto a = chrono::high_resolution_clock::now().time_since_epoch();
+    auto now_ms = std::chrono::duration_cast<std::chrono::microseconds>(a);
+    srand(hash3(now_ms.count(), getpid()));
     int  objfun = 0;
     bool feasible = true;
     std::vector<int>::iterator it = indexes.begin();
@@ -135,8 +142,21 @@ float Heuristic::solveGreedy(vector<double>& stat, vector<int> indexes, Data pro
                 feasible = false;
                 break;
             }     // ----------------------------- not feasible
-            for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
+            vector<int> customers;
+            for(int cust=0; cust < nCustomerTypes; cust++)
+                customers.push_back(cust);
+
+            //srand(hash3(time(0),chrono::high_resolution_clock::now().time_since_epoch().count(), getpid()));
+
+            random_shuffle(customers.begin(), customers.end(), myrand1);
+            for(int cust=0; cust < nCustomerTypes; cust++)
+                cout << customers[cust];
+            cout << endl;
+            //for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
+            for(vector<int>::iterator cIt = customers.begin(); cIt != customers.end(); cIt++)
             {
+
+                m = *cIt;
                 if (demand < problem.n[m])
                     continue;
 
@@ -206,8 +226,21 @@ float Heuristic::solveGreedy(vector<double>& stat, vector<int> indexes, Data pro
                     objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
 
     ////////////////////////////////////////////////////////////////////////////////////////////7
+    it = indexes.begin();
+    for ( ; it != end; it++)
+        cout << " " << *it;
+
+    cout << endl;
     if (!feasible)
         cout << "Not feasible solution!" << endl;
+    else
+    {
+        cout << "Feasible solution!" << endl;
+
+    }
+    cout << "------------------" << endl;
+
+
     stat.push_back(objfun);
     stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
 

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <chrono>
 
 using namespace std;
 
@@ -46,6 +47,9 @@ private:
      * Number of periods
      */
     int nTimeSteps;
+
+
+
 
     /**
      * Number of customer types
@@ -94,6 +98,11 @@ public:
      */
     void solveFast(vector<double>& stat, int timeLimit = - 1);
 
+    unsigned int hash3( unsigned int h2, unsigned int h3)
+    {
+        unsigned int a = (h2)*2654435789U + h3;
+        return a;
+    };
     /**
      * Puts KPIs in the statistics' array. Call this only if problem has a solution
      * @param stat Array of statistics
@@ -127,7 +136,26 @@ public:
     };
 
     Data getProblem(){
-        return problem;
+        Data p;
+        p.costs = problem.costs;
+        p.n = problem.n;
+        p.activities = new int[nCells];
+        memcpy(p.activities, problem.activities, nCells*sizeof(int));
+        p.usersCell = new int**[nCells];
+        for (int i = 0; i < this->nCells; i++) {
+            p.usersCell[i] = new int*[nCustomerTypes];
+            //memcpy(p.usersCell[i], problem.usersCell[i], nCustomerTypes*sizeof(int));
+            for (int m = 0; m < this->nCustomerTypes; m++) {
+                p.usersCell[i][m] = new int[nTimeSteps];
+                for (int t = 0; t<nTimeSteps; t++)
+                    memcpy(&p.usersCell[i][m][t], &problem.usersCell[i][m][t], sizeof(int));
+
+            }
+
+
+        }
+
+        return p;
     }
 
 };

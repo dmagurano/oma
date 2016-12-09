@@ -35,6 +35,8 @@ list
 -
 map
 -
+chrono
+-
 
 C:/Users/matti/ClionProjects/Material_assignment/main.cpp
 list
@@ -43,9 +45,19 @@ iostream
 -
 list
 -
+random
+-
 iostream
 -
+algorithm
+-
+cstdlib
+-
+ctime
+-
 cstring
+-
+chrono
 -
 utils.h
 C:/Users/matti/ClionProjects/Material_assignment/utils.h
