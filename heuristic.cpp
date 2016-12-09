@@ -2,8 +2,7 @@
 #include <random>
 #include <algorithm>
 #include "heuristic.h"
-#include <ga/GASimpleGA.h>	// we're going to use the simple GA
-#include <ga/GA1DArrayGenome.h>
+
 
 using namespace std;
 

@@ -3,11 +3,12 @@
 #include <stdio.h>
 #include <cmath>
 #include <cstring>
+#include <algorithm>
 #include "utils.h"
 #include "heuristic.h"
 
-#include <ga/ga.h>
-#include <ga/std_stream.h>
+#include "ga/ga.h"
+
 
 #define cout STD_COUT
 #define ostream STD_OSTREAM
@@ -69,7 +70,7 @@ int main(int argc,char *argv[]){
         nCells = _heuristic.nCells;
         solution = _heuristic.solution;
 
-        int popsize  = 20;
+        int popsize  = 100;
         int ngen     = 1000000;
         float pmut   = 0.5;
         float pcross = 0.5;
@@ -83,7 +84,7 @@ int main(int argc,char *argv[]){
 
 //        GASimpleGA ga(genome);// create the GA
 //
-//        ga.minimize();
+//
 //        ga.populationSize(popsize);
 //        ga.nGenerations(ngen);
 //        ga.pMutation(pmut);
@@ -91,20 +92,24 @@ int main(int argc,char *argv[]){
 
         GASteadyStateGA ga(genome);
 
-        GASigmaTruncationScaling trunc;
-        ga.scaling(trunc);
+//        GASigmaTruncationScaling trunc;
+//        ga.scaling(trunc);
         ga.set(gaNpopulationSize, 20);
         ga.set(gaNpCrossover, 0.6);
         ga.set(gaNpMutation, 0.4);
         ga.set(gaNnGenerations, 10000);
         ga.set(gaNpReplacement, 0.4);
+
+
         ga.minimize();
 
-        clock_t tStart = clock();
+
 
         ga.initialize();
 
-        while( ((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 ){
+        clock_t tStart = clock();
+
+        while( ((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 60.0 ){
             ga.step();
         }
 
@@ -217,8 +222,19 @@ float Objective(GAGenome& g){
                 feasible = false;
                 break;
             }     // ----------------------------- not feasible
-            for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
+
+            vector<int> customers;
+            for(int cust=0; cust < nCustomerTypes - 1; cust++)
+                customers.push_back(cust);
+
+            srand(unsigned (time(0)) );
+            random_shuffle ( customers.begin(), customers.end() );
+
+            //for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
+            for(vector<int>::iterator cIt = customers.begin(); cIt != customers.end(); cIt++)
             {
+                m = *cIt;
+
                 if (demand < problem.n[m])
                     continue;
 
