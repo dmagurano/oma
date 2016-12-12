@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <algorithm>
+#include <chrono>
 #include "utils.h"
 #include "heuristic.h"
 
@@ -72,8 +73,8 @@ int main(int argc,char *argv[]){
 
         int popsize  = 100;
         int ngen     = 1000000;
-        float pmut   = 0.5;
-        float pcross = 0.5;
+        float pmut   = 0.01;
+        float pcross = 0.9;
 
 
         GAListGenome<int> genome(Objective);
@@ -92,13 +93,13 @@ int main(int argc,char *argv[]){
 
         GASteadyStateGA ga(genome);
 
-//        GASigmaTruncationScaling trunc;
-//        ga.scaling(trunc);
+        GASigmaTruncationScaling trunc;
+        ga.scaling(trunc);
         ga.set(gaNpopulationSize, 20);
         ga.set(gaNpCrossover, 0.6);
-        ga.set(gaNpMutation, 0.4);
+        ga.set(gaNpMutation, 0.1);
         ga.set(gaNnGenerations, 10000);
-        ga.set(gaNpReplacement, 0.4);
+        ga.set(gaNpReplacement, 0.1);
 
 
         ga.minimize();
@@ -109,7 +110,7 @@ int main(int argc,char *argv[]){
 
         clock_t tStart = clock();
 
-        while( ((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 60.0 ){
+        while( ((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 ){
             ga.step();
         }
 
@@ -118,10 +119,10 @@ int main(int argc,char *argv[]){
 		cout << "best individual is " << ga.statistics().bestIndividual() << "\n\n";
 		cout << ga.statistics() << "\n";
 
-        for(int i=0; i<ga.statistics().bestPopulation().size(); i++){
-            genome = ga.statistics().bestPopulation().individual(i);
-            cout << genome << "\n";
-        }
+//        for(int i=0; i<ga.statistics().bestPopulation().size(); i++){
+//                genome = ga.statistics().bestPopulation().individual(i);
+//                cout << genome << "\n";
+//        }
 
         int objFun = ga.statistics().bestIndividual().score();
 
@@ -145,8 +146,9 @@ int main(int argc,char *argv[]){
             cout << *it << " " ;
         }
 
-        _heuristic.solveGreedy(stat,order,problem);
+        cout << "\n";
 
+        _heuristic.solveGreedy(stat,order,problem);
 
         _heuristic.hasSolution = true;
 
@@ -186,6 +188,11 @@ float Objective(GAGenome& g){
 
     GAListGenome<int> & genome = (GAListGenome<int> &)g;
 
+    auto a = chrono::high_resolution_clock::now().time_since_epoch();
+    auto now_ms = std::chrono::duration_cast<std::chrono::microseconds>(a);
+    srand(now_ms.count());
+
+
     int i, j, m, t, w;
     bool notSatisfied;
     for (i = 0; i < nCells; i++)
@@ -224,10 +231,10 @@ float Objective(GAGenome& g){
             }     // ----------------------------- not feasible
 
             vector<int> customers;
-            for(int cust=0; cust < nCustomerTypes - 1; cust++)
+            for(int cust=0; cust < nCustomerTypes; cust++)
                 customers.push_back(cust);
 
-            srand(unsigned (time(0)) );
+
             random_shuffle ( customers.begin(), customers.end() );
 
             //for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
@@ -235,6 +242,7 @@ float Objective(GAGenome& g){
             {
                 m = *cIt;
 
+            //per non sforare
                 if (demand < problem.n[m])
                     continue;
 

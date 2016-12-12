@@ -178,6 +178,7 @@ float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data pr
             }     // ----------------------------- not feasible
             for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
             {
+                //per non sforare con i task
                 if (demand < problem.n[m])
                     continue;
 
@@ -235,6 +236,8 @@ float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data pr
                     // controllo se ho soddisfatto le richieste
                     if(demand == 0)
                         notSatisfied = false;
+                    else //for debug
+                        problem.activities[j] = demand;
                 }
             }
         }
@@ -247,8 +250,26 @@ float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data pr
                     objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
 
     ////////////////////////////////////////////////////////////////////////////////////////////7
-    if (!feasible)
-        cout << "Not feasible solution!" << endl;
+    if (!feasible) {
+        cout << "Not feasible solution!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+           cout << problem.activities[i] << " ";
+        cout << "\n\n";
+
+
+        for(int m=0;m<nCustomerTypes;m++)
+            for(int t=0;t<nTimeSteps;t++){
+                cout << "User type: " << m << ", time: " << t << endl;
+                for(int i=0; i<nCells; i++)
+                    cout << problem.usersCell[i][m][t] << " ";
+                cout << endl;
+            }
+
+
+
+    }
     stat.push_back(objfun);
     stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
 
