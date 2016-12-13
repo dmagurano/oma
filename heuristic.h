@@ -10,6 +10,7 @@
 #include <list>
 #include <map>
 #include <cstring>
+#include "diophantine_solver.h"
 
 using namespace std;
 
@@ -116,6 +117,7 @@ public:
     void writeSolution(string path);
 
     float solveGreedy(vector<double>& stat, vector<int> indexes, Data problem);
+    float solveDio( vector<double>& stat, vector<int> indexes, Data problem);
     /**
      * Check the feasibility of the problem
      * @param path path of the solution file

@@ -148,7 +148,9 @@ int main(int argc,char *argv[]){
 
         cout << "\n";
 
-        _heuristic.solveGreedy(stat,order,problem);
+//        _heuristic.solveGreedy(stat,order,problem);
+
+        _heuristic.solveDio(stat,order,problem);
 
         _heuristic.hasSolution = true;
 

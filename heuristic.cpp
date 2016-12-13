@@ -279,6 +279,122 @@ float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data pr
     return (float) floor(objfun);
 }
 
+float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data problem) {
+
+    clock_t tStart = clock();
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
+
+    int  objfun = 0;
+    bool feasible = true;
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    // per ogni dest:
+    for (; it!=end; it++)
+    {
+        j = *it;
+        notSatisfied = true;
+        int demand = problem.activities[j];
+        // w -> dim|i-j|
+        for (w=1; w<nCells && notSatisfied; w++)
+        {
+            if (j-w < 0 && j+w > nCells)
+            {
+                feasible = false;
+                break;
+            }     // ----------------------------- not feasible
+
+            // select a source nearby
+            int i;
+            for (int c = 0; c < 2; c++)
+            {
+                if (c == 0)
+                    i = j + w;
+                else if ( c == 1)
+                    i = j - w;
+                //per evitare di sforare l'index
+                if (j+w >= nCells)
+                    i = j - w;
+                if (j-w < 0)
+                    i = j + w;
+
+                float objfunct = 0;
+                float min = INT64_MAX;
+                int min_x, min_y, min_z, min_t;
+                diophantine_solver ds = diophantine_solver(problem.n[0], problem.n[1], problem.n[2], demand);
+                int m = 1000, k = 1000;
+                for (int t = 0; t < nTimeSteps; t++)
+                {
+                    objfunct = 0;
+                    // implementare una strategia per scegliere quanti utenti recuperare
+                    if (ds.solve(&m, &k, problem.usersCell[i][0][t], problem.usersCell[i][1][t],
+                                 problem.usersCell[i][2][t]).size() > 0) {
+                        // se è possibile distribuire gli utenti valuta i costi della soluzione su tutti gli istanti temporali
+                        objfunct = ds.getX() * problem.costs[i][j][0][t] +
+                                   ds.getY() * problem.costs[i][j][1][t] +
+                                   ds.getZ() * problem.costs[i][j][2][t];
+                        if (objfunct < min) {
+                            min = objfunct;
+                            min_x = ds.getX();
+                            min_y = ds.getY();
+                            min_z = ds.getZ();
+                            min_t = t;
+                        }
+
+                    }
+                }
+                solution[i][j][0][min_t] = min_x;
+                solution[i][j][1][min_t] = min_y;
+                solution[i][j][2][min_t] = min_z;
+
+                for (int m = 0; m < nCustomerTypes; m++) {
+                    problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
+                    demand -= solution[i][j][m][min_t] * problem.n[m];
+                }
+
+
+                //check if demand has been satisfied
+
+                if(demand <= 0){
+                    notSatisfied = false;
+                    break;
+                }
+
+            }
+
+
+
+
+        }
+    }
+
+
+    for (int i = 0; i < nCells; i++)
+        for (int j = 0; j < nCells; j++)
+            for (int m = 0; m < nCustomerTypes; m++)
+                for (int t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (!feasible)
+        cout << "Not feasible solution!" << endl;
+    stat.push_back(objfun);
+    stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
+
+    hasSolution=true;
+
+
+    return (float) floor(objfun);
+}
+
 void Heuristic::writeKPI(string path, string instanceName, vector<double> stat){
     if (!hasSolution)
         return;
