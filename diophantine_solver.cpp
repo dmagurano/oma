@@ -12,6 +12,11 @@ diophantine_solver::diophantine_solver(int a, int b, int c, int d){
     this->b = b;
     this->c = c;
     this->d = d;
+    this->x.weight = 0.33;
+    this->y.weight = 0.33;
+    this->z.weight = 0.33;
+    this->max_tentativi = 10000;
+    solved = false;
 }
 
 int diophantine_solver::MCD(int x, int y){
@@ -52,6 +57,10 @@ Let p = GCD(a,b), a' = a/p, b' = b/p
 */
 std::vector<int> diophantine_solver::solve(int *k, int *m, int max_x, int max_y, int max_z)
 {
+    x.max_value = max_x;
+    y.max_value = max_y;
+    z.max_value = max_z;
+    //general solution computation
     int p = MCD(this->a, this->b);
     int a1, b1;
     a1 = this->a/p;
@@ -78,59 +87,177 @@ std::vector<int> diophantine_solver::solve(int *k, int *m, int max_x, int max_y,
     y0 = temp2d.data()[1];
     x0 = temp2d.data()[0];
 
+    // initial solution generated
     temp2d = std::vector<int>();
 
     srand(time(NULL));
     int tentativi = 0;
-
+    int new_k, new_m;
+    bool direction_k = true, direction_m = true;
+    srand(time(NULL));
+    this->solved = false;
     do
     {
-        this->x = x0 + b1 * *k - u0 * *m;
-        this->y = y0 - a1 * *k - v0 * *m;
-        this->z = z0 + p * *m;
+        // trying to get a good solution first with the initial k and m
+        setX(x0 + b1 * *k - u0 * *m);
+        setY(y0 - a1 * *k - v0 * *m);
+        setZ(z0 + p * *m);
 
-        *k = rand() % ((max_x + max_y + max_z) > 100? max_x + max_y + max_z : 100);
-        *m = rand() % ((max_x + max_y + max_z) > 100? max_x + max_y + max_z : 100);
 
-        if (rand()%101 > 50)
-            *k *= -1;
 
-        if (rand()%101 > 50)
-            *m *= -1;
-
-        tentativi++;
-        if (this->x >= 0 && this->x <= max_x)
+        if ((this->x.val >= 0 && this->x.val <= max_x) && (this->y.val >= 0 && this->y.val <= max_y) && (this->z.val >= 0 && this->z.val <= max_z))
         {
-            if (this->y >= 0 && this->y <= max_y)
-            {
-                if (this->z >= 0 && this->z <= max_z)
-                {
-                    temp2d.push_back(x);
-                    temp2d.push_back(y);
-                    temp2d.push_back(z);
-                    break;
-                }
-            }
+            this->solved = true;
+        }
+        else
+        {
+            this->solved = false;
+        }
+        //otherwise try to move to other two k and m which improve the solution
+        new_k = get_random_value_from_interval(*k, 20, direction_k);
+        new_m = get_random_value_from_interval(*m, 20, direction_m);
+
+        if (score(x0 + b1 * new_k - u0 * new_m, y0 - a1 * new_k - v0 * new_m, z0 + p * new_m, x.max_value, y.max_value, z.max_value) < score())
+        {
+            direction_k = new_k - *k < 0;
+            direction_m = new_m - *m < 0;
+            *k = new_k;
+            *m = new_m;
+        }
+        else
+        {
+            // if no improvement try new direction
+            direction_k = ! direction_k;
+            direction_m = ! direction_m;
+        }
+        tentativi++;
+    }
+    while (! solved && tentativi < this->max_tentativi);
+    if (this->solved)
+    {
+        temp2d.push_back(getX());
+        temp2d.push_back(getY());
+        temp2d.push_back(getZ());
+    }
+    return temp2d;
+}
+
+int diophantine_solver::get_random_value_from_interval(int x0, int r, bool negative)
+{
+    int r_offset = rand() % r + 1;
+    r_offset *= negative ? -1 : 1;
+    return x0 + r_offset;
+}
+
+float diophantine_solver::score()
+{
+    return score(getX(), getY(), getZ(), x.max_value, y.max_value, z.max_value);
+}
+
+bool diophantine_solver::isSolved()
+{
+    return this->solved;
+}
+
+float diophantine_solver::score(int x, int y, int z, int max_x, int max_y, int max_z)
+{
+    float score_x, score_y, score_z, score;
+    if (x < 0 || x > max_x)
+    {
+        if (x < 0)
+        {
+            score_x = -x;
+        }
+        else
+        {
+            score_x = x - max_x;
         }
     }
-    while (tentativi < 1000);
 
-    return temp2d;
+    if (y < 0 || y > max_y)
+    {
+        if (y < 0)
+        {
+            score_y = -y;
+        }
+        else
+        {
+            score_y = y - max_y;
+        }
+    }
+
+    if (z < 0 || z > max_z)
+    {
+        if (z < 0)
+        {
+            score_z = -z;
+        }
+        else
+        {
+            score_z = z - max_z;
+        }
+    }
+
+    score = score_x * this->x.weight + score_y * this->y.weight + score_z * this->z.weight;
+
+    if (score < 0)
+    {
+        score *= -1;
+    }
+    return score;
+}
+
+void diophantine_solver::setX(int x)
+{
+    this->solved = true;
+    this->x.val = x;
+}
+
+void diophantine_solver::setY(int y)
+{
+    this->solved = true;
+    this->y.val = y;
+}
+
+void diophantine_solver::setZ(int z)
+{
+    this->solved = true;
+    this->z.val = z;
 }
 
 int diophantine_solver::getX()
 {
-    return this->x;
+    return this->x.val;
 }
 
 int diophantine_solver::getY()
 {
-    return this->y;
+    return this->y.val;
 }
 
 int diophantine_solver::getZ()
 {
-    return this->z;
+    return this->z.val;
+}
+
+void diophantine_solver::setWeightX(float w)
+{
+    this->x.weight = w;
+}
+
+void diophantine_solver::setWeightY(float w)
+{
+    this->y.weight = w ;
+}
+
+void diophantine_solver::setWeightZ(float w)
+{
+    this->z.weight = w ;
+}
+
+void diophantine_solver::setTentativi(int t)
+{
+    this->max_tentativi = t;
 }
 
 /* https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm

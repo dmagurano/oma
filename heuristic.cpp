@@ -306,7 +306,7 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
         // w -> dim|i-j|
         for (w=1; w<nCells && notSatisfied; w++)
         {
-            if (j-w < 0 && j+w > nCells)
+            if (j-w < 0 && j+w >= nCells)
             {
                 feasible = false;
                 break;
@@ -314,8 +314,10 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
 
             // select a source nearby
             int i;
-            for (int c = 0; c < 2; c++)
+            for (int c = 0; c < 2 && demand > 0; c++)
             {
+
+
                 if (c == 0)
                     i = j + w;
                 else if ( c == 1)
@@ -330,13 +332,21 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                 float min = INT64_MAX;
                 int min_x, min_y, min_z, min_t;
                 diophantine_solver ds = diophantine_solver(problem.n[0], problem.n[1], problem.n[2], demand);
-                int m = 1000, k = 1000;
+//                int m = 1000, k = 1000;
+                int m=0,k=0;
+                bool foundSol = false;
                 for (int t = 0; t < nTimeSteps; t++)
                 {
                     objfunct = 0;
+                    ds.setTentativi(100);
+                    ds.setWeightX(problem.costs[i][j][0][t]);
+                    ds.setWeightY(problem.costs[i][j][1][t]);
+                    ds.setWeightZ(problem.costs[i][j][2][t]);
+                    foundSol = ds.solve(&m, &k, problem.usersCell[i][0][t], problem.usersCell[i][1][t],
+                                                problem.usersCell[i][2][t]).size() > 0;
+
                     // implementare una strategia per scegliere quanti utenti recuperare
-                    if (ds.solve(&m, &k, problem.usersCell[i][0][t], problem.usersCell[i][1][t],
-                                 problem.usersCell[i][2][t]).size() > 0) {
+                    if (foundSol) {
                         // se è possibile distribuire gli utenti valuta i costi della soluzione su tutti gli istanti temporali
                         objfunct = ds.getX() * problem.costs[i][j][0][t] +
                                    ds.getY() * problem.costs[i][j][1][t] +
@@ -349,24 +359,27 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                             min_t = t;
                         }
 
+                    }//if
+                }
+                if(foundSol){
+                    solution[i][j][0][min_t] = min_x;
+                    solution[i][j][1][min_t] = min_y;
+                    solution[i][j][2][min_t] = min_z;
+
+                    for (int m = 0; m < nCustomerTypes; m++) {
+                        problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
+                        demand -= solution[i][j][m][min_t] * problem.n[m];
+                        //for debug
+                        problem.activities[j] = demand;
                     }
                 }
-                solution[i][j][0][min_t] = min_x;
-                solution[i][j][1][min_t] = min_y;
-                solution[i][j][2][min_t] = min_z;
-
-                for (int m = 0; m < nCustomerTypes; m++) {
-                    problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
-                    demand -= solution[i][j][m][min_t] * problem.n[m];
-                }
-
-
                 //check if demand has been satisfied
 
                 if(demand <= 0){
                     notSatisfied = false;
                     break;
                 }
+
 
             }
 
@@ -384,8 +397,26 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                     objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
 
     ////////////////////////////////////////////////////////////////////////////////////////////7
-    if (!feasible)
-        cout << "Not feasible solution!" << endl;
+    if (!feasible) {
+        cout << "Not feasible solution!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
+
+
+        for(int m=0;m<nCustomerTypes;m++)
+            for(int t=0;t<nTimeSteps;t++){
+                cout << "User type: " << m << ", time: " << t << endl;
+                for(int i=0; i<nCells; i++)
+                    cout << problem.usersCell[i][m][t] << " ";
+                cout << endl;
+            }
+
+
+
+    }
     stat.push_back(objfun);
     stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
 
