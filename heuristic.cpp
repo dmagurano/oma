@@ -2,6 +2,7 @@
 #include <random>
 #include <algorithm>
 #include "heuristic.h"
+#include "group.h"
 
 
 using namespace std;
@@ -291,37 +292,48 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
         {
             continue;
         }
-        int group1, group2;
-        int mcm, min, max;
+        int group1_type, group2_type;
+        int mcm;
         bool group1_present, group2_present;
-        int group1_origin_index, group2_origin_index;
+        int group1_source_index, group2_source_index;
+        int group1_time, group2_time;
 
 
         do {
-            group1 = rand() % 3;
+            group1_type = rand() % 3;
             group1_present = false;
             for (int i = 0; i < nCells && !group1_present; i++) {
                 if (i != j) {
                     for (int t = 0; t < nTimeSteps && !group1_present; t++) {
-                        if (solution[i][j][group1][t] > 0) {
+                        if (solution[i][j][group1_type][t] > 0) {
                             group1_present = true;
-                            group1_origin_index = i;
+                            group1_source_index = i;
+                            group1_time = t;
                             break;
                         }
                     }
                 }
             }
-        } while (group1_present == false);
+        } while (group1_present == false)
 
-        do {
-            group2 = rand() % 3;
+        int destination2;
+
+        do
+        {
+            destination2 = rand() % nCells;
+            if (destination2 == j || problem.activities[destination2] == 0)
+            {
+                continue;
+            }
+            group2_type = rand() % 3;
             group2_present = false;
             for (int i = 0; i < nCells && !group2_present; i++) {
                 if (i != j) {
                     for (int t = 0; t < nTimeSteps && !group2_present; t++) {
-                        if (solution[i][j][group1][t] > 0) {
+                        if (solution[i][destination2][group1_type][t] > 0) {
                             group2_present = true;
-                            group2_origin_index = i;
+                            group2_source_index = i;
+                            group2_time = t;
                             break;
                         }
                     }
@@ -329,9 +341,16 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
             }
         } while (group2_present == false);
 
-        
-        mcm = diophantine_solver::mcm(problem.n[group1], problem.n[group2]);
-        
+
+        mcm = diophantine_solver::mcm(problem.n[group1_type], problem.n[group2_type]);
+
+        group group1 = group::group(mcm, group1_source_index, j, group1_type,problem.n[group1_type], group1_time, \
+                                           solution[group1_source_index][j][group1_type][group1_time]);
+
+        group group2 = group::group(group1, mcm, group2_source_index, destination2, group2_type, group2_time);
+
+
+
 
     }
 

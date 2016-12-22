@@ -71,6 +71,7 @@ public:
 
     /**
      * Variables of the problem (X in the model)
+     * i source j destination m type t time
      */
     int**** solution;
 
