@@ -152,6 +152,13 @@ int main(int argc,char *argv[]){
 
         _heuristic.solveDio(stat,order,problem);
 
+
+
+
+        //tabu search first improvement here
+        // lavoriamo con il risultato della diofantina per partire in una tabu search
+
+
         _heuristic.hasSolution = true;
 
         /////////////////////////////////////////////////////////////////
@@ -399,30 +406,32 @@ float Objective2(GAGenome& g){
                     ds.setTentativi(1000);
                     // implementare una strategia per scegliere quanti utenti recuperare
                     if (ds.solve(&m, &k, problem.usersCell[i][0][t], problem.usersCell[i][1][t],
-                                 problem.usersCell[i][2][t]).size() > 0) {
+                                 problem.usersCell[i][2][t]).size() > 0)
+                    {
                         // se è possibile distribuire gli utenti valuta i costi della soluzione su tutti gli istanti temporali
                         objfunct = ds.getX() * problem.costs[i][j][0][t] +
                                    ds.getY() * problem.costs[i][j][1][t] +
                                    ds.getZ() * problem.costs[i][j][2][t];
-                        if (objfunct < min) {
+                        if (objfunct < min)
+                        {
                             min = objfunct;
                             min_x = ds.getX();
                             min_y = ds.getY();
                             min_z = ds.getZ();
                             min_t = t;
                         }
-                        solution[i][j][0][min_t] = min_x;
-                        solution[i][j][1][min_t] = min_y;
-                        solution[i][j][2][min_t] = min_z;
-
-                        for (int m = 0; m < nCustomerTypes; m++) {
-                            problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
-                            demand -= solution[i][j][m][min_t] * problem.n[m];
-                            //for debug
-                            problem.activities[j] = demand;
-                        }
-
                     }
+                }
+
+                solution[i][j][0][min_t] = min_x;
+                solution[i][j][1][min_t] = min_y;
+                solution[i][j][2][min_t] = min_z;
+
+                for (int m = 0; m < nCustomerTypes; m++) {
+                    problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
+                    demand -= solution[i][j][m][min_t] * problem.n[m];
+                    //for debug
+                    problem.activities[j] = demand;
                 }
 
                 //check if demand has been satisfied

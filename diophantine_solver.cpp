@@ -17,6 +17,7 @@ diophantine_solver::diophantine_solver(int a, int b, int c, int d){
     this->z.weight = 0.33;
     this->max_tentativi = 10000;
     solved = false;
+    unsolvable = false;
 }
 
 int diophantine_solver::MCD(int x, int y){
@@ -42,7 +43,10 @@ int diophantine_solver::MCD(int x, int y){
     return a;
 }
 
-
+int diophantine_solver::mcm(int a, int b)
+{
+    return ( (a * b) / MCD(a,b) );
+}
 /*
 Let p = GCD(a,b), a' = a/p, b' = b/p
  Let u0 and v0 any solution of a'u + b'v = c
@@ -57,6 +61,18 @@ Let p = GCD(a,b), a' = a/p, b' = b/p
 */
 std::vector<int> diophantine_solver::solve(int *k, int *m, int max_x, int max_y, int max_z)
 {
+    // se anche mandando tutti gli utenti non si riesce a soddisfare la richiesta l'equazione è irrisolvibile
+    std::vector<int> temp2d;
+    if (max_x * this->a + max_y * this->b + max_z * this->c < d)
+    {
+        // se la domanda è troppo alta manda tutti
+        setX(max_x);
+        setY(max_y);
+        setZ(max_z);
+        this->solved = true;
+        //setIsSolvable(false);
+        return temp2d;
+    }
     x.max_value = max_x;
     y.max_value = max_y;
     z.max_value = max_z;
@@ -68,7 +84,9 @@ std::vector<int> diophantine_solver::solve(int *k, int *m, int max_x, int max_y,
 
     int u0, v0;
 
-    std::vector<int> temp2d = solve2d(a1, b1, this->c, 2);
+    temp2d = solve2d(a1, b1, this->c, 2);
+
+    if (this->unsolvable) return temp2d;
 
     v0 = temp2d.data()[1];
     u0 = temp2d.data()[0];
@@ -77,12 +95,16 @@ std::vector<int> diophantine_solver::solve(int *k, int *m, int max_x, int max_y,
 
     temp2d = solve2d(this->c, p, this->d, 2);
 
+    if (this->unsolvable) return temp2d;
+
     t0 = temp2d.data()[1];
     z0 = temp2d.data()[0];
 
     int x0, y0;
 
     temp2d = solve2d(a1, b1, t0, 2);
+
+    if (this->unsolvable) return temp2d;
 
     y0 = temp2d.data()[1];
     x0 = temp2d.data()[0];
@@ -93,7 +115,7 @@ std::vector<int> diophantine_solver::solve(int *k, int *m, int max_x, int max_y,
     srand(time(NULL));
     int tentativi = 0;
     int new_k, new_m;
-    bool direction_k = true, direction_m = true;
+
     srand(time(NULL));
     this->solved = false;
     do
@@ -108,27 +130,36 @@ std::vector<int> diophantine_solver::solve(int *k, int *m, int max_x, int max_y,
         if ((this->x.val >= 0 && this->x.val <= max_x) && (this->y.val >= 0 && this->y.val <= max_y) && (this->z.val >= 0 && this->z.val <= max_z))
         {
             this->solved = true;
+            break;
         }
         else
         {
             this->solved = false;
         }
         //otherwise try to move to other two k and m which improve the solution
-        new_k = get_random_value_from_interval(*k, 20, direction_k);
-        new_m = get_random_value_from_interval(*m, 20, direction_m);
+        //new_k = get_random_value_from_interval(*k, 20, direction_k);
+        //new_m = get_random_value_from_interval(*m, 20, direction_m);
+        int raggio = rand()%20;
+        float bestscore = score();
+        int bestteta  = 0;
 
-        if (score(x0 + b1 * new_k - u0 * new_m, y0 - a1 * new_k - v0 * new_m, z0 + p * new_m, x.max_value, y.max_value, z.max_value) < score())
+        for (int teta = 0; teta < 360; teta++)
         {
-            direction_k = new_k - *k < 0;
-            direction_m = new_m - *m < 0;
-            *k = new_k;
-            *m = new_m;
+            new_k = *k + raggio * cos ( teta * PI / 180.0);
+            new_m = *m + raggio * sin ( teta * PI / 180.0);
+
+            if (score(x0 + b1 * new_k - u0 * new_m, y0 - a1 * new_k - v0 * new_m, z0 + p * new_m, x.max_value,
+                      y.max_value, z.max_value) < bestscore) {
+                bestteta = teta;
+                bestscore = score(x0 + b1 * new_k - u0 * new_m, y0 - a1 * new_k - v0 * new_m, z0 + p * new_m, x.max_value,
+                                  y.max_value, z.max_value);
+            }
+
         }
-        else
+        if (bestscore != score())
         {
-            // if no improvement try new direction
-            direction_k = ! direction_k;
-            direction_m = ! direction_m;
+            *k += raggio * cos ( bestteta * PI / 180.0);
+            *m += raggio * sin ( bestteta * PI / 180.0);
         }
         tentativi++;
     }
@@ -157,6 +188,14 @@ float diophantine_solver::score()
 bool diophantine_solver::isSolved()
 {
     return this->solved;
+}
+
+void diophantine_solver::setIsSolvable(bool solvable) {
+    this->unsolvable = ! solvable;
+    if (this->unsolvable)
+    {
+        this->solved = false;
+    }
 }
 
 float diophantine_solver::score(int x, int y, int z, int max_x, int max_y, int max_z)
@@ -267,9 +306,10 @@ std::vector<int> diophantine_solver::solve2d(int a, int b, int c, int k)
 {
     std::vector<int> result = std::vector<int>();
     int g = MCD(a, b);
-    if (c % g != 0)
-        return  result;
-
+    if (c % g != 0) {
+        setIsSolvable(false);
+        return result;
+    }
     int a1, b1, c1;
 
     a1 = a / g;

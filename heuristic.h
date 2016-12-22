@@ -118,6 +118,7 @@ public:
 
     float solveGreedy(vector<double>& stat, vector<int> indexes, Data problem);
     float solveDio( vector<double>& stat, vector<int> indexes, Data problem);
+    float solveTabu( vector<double>& stat, vector<int> indexes, Data problem);
     /**
      * Check the feasibility of the problem
      * @param path path of the solution file

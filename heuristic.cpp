@@ -279,6 +279,135 @@ float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data pr
     return (float) floor(objfun);
 }
 
+float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data problem)
+{
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    int j, startTime;
+    for (; it!=end; it++)
+    {
+        j = *it; //j origin cell
+        if (problem.activities[j] == 0)
+        {
+            continue;
+        }
+        int group1, group2;
+        int mcm, min, max;
+        bool group1_present, group2_present;
+        int group1_origin_index, group2_origin_index;
+
+
+        do {
+            group1 = rand() % 3;
+            group1_present = false;
+            for (int i = 0; i < nCells && !group1_present; i++) {
+                if (i != j) {
+                    for (int t = 0; t < nTimeSteps && !group1_present; t++) {
+                        if (solution[i][j][group1][t] > 0) {
+                            group1_present = true;
+                            group1_origin_index = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        } while (group1_present == false);
+
+        do {
+            group2 = rand() % 3;
+            group2_present = false;
+            for (int i = 0; i < nCells && !group2_present; i++) {
+                if (i != j) {
+                    for (int t = 0; t < nTimeSteps && !group2_present; t++) {
+                        if (solution[i][j][group1][t] > 0) {
+                            group2_present = true;
+                            group2_origin_index = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        } while (group2_present == false);
+
+        
+        mcm = diophantine_solver::mcm(problem.n[group1], problem.n[group2]);
+        
+
+    }
+
+        /*int min_task[3], max_task[3];
+
+        int group_activities_origin;
+        int group_activities_destination;
+
+        for (int i = 0; i < nCells; i++)
+        {
+            for (int m = 0; m < nCustomerTypes; m++)
+            {
+                for (int t = 0; t < nTimeSteps; t++)
+                {
+                    if (i != j)
+                    {
+                        if (solution[i][j][m][t] > 0)
+                        {
+                            if (min_task[m] < problem.n[m])
+                            {
+                                min_task[m] = problem.n[m];
+                            }
+                            if (max_task[m] > problem.n[m])
+                            {
+                                max_task[m] = problem.n[m] * solution[i][j][m][t];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            group_activities_origin += rand() % (max_task[i] - min_task[i]) + min_task[i];
+        }
+
+        int destination_cell;
+        do
+        {
+            destination_cell = rand() % nCells;
+        } while (destination_cell == j || problem.activities[destination_cell] == 0);
+
+        for (int i = 0; i < nCells; i++)
+        {
+            for (int m = 0; m < nCustomerTypes; m++)
+            {
+                for (int t = 0; t < nTimeSteps; t++)
+                {
+                    if (i != j)
+                    {
+                        if (solution[i][j][m][t] > 0)
+                        {
+                            if (min_task[m] < problem.n[m])
+                            {
+                                min_task[m] = problem.n[m];
+                            }
+                            if (max_task[m] > problem.n[m])
+                            {
+                                max_task[m] = problem.n[m] * solution[i][j][m][t];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            group_activities_destination += rand() % (max_task[i] - min_task[i]) + min_task[i];
+        }
+    }*/
+
+
+}
+
 float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data problem) {
 
     clock_t tStart = clock();
@@ -333,20 +462,27 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                 int min_x, min_y, min_z, min_t;
                 diophantine_solver ds = diophantine_solver(problem.n[0], problem.n[1], problem.n[2], demand);
 //                int m = 1000, k = 1000;
-                int m=0,k=0;
+                int m=rand()%10,k=rand()%10;
                 bool foundSol = false;
                 for (int t = 0; t < nTimeSteps; t++)
                 {
+                    if (problem.usersCell[i][0][t] == 0 && problem.usersCell[i][1][t] == 0 && problem.usersCell[i][2][t] == 0)
+                        continue;
                     objfunct = 0;
                     ds.setTentativi(100);
-                    ds.setWeightX(problem.costs[i][j][0][t]);
-                    ds.setWeightY(problem.costs[i][j][1][t]);
-                    ds.setWeightZ(problem.costs[i][j][2][t]);
+                    float w1, w2, w3;
+                    w3 = problem.costs[i][j][0][t] + problem.costs[i][j][1][t] + problem.costs[i][j][2][t];
+                    w1 = problem.costs[i][j][0][t] / w3;
+                    w2 = problem.costs[i][j][1][t] / w3;
+                    w3 = problem.costs[i][j][2][t] / w3;
+                    ds.setWeightX(w1);
+                    ds.setWeightY(w2);
+                    ds.setWeightZ(w3);
                     foundSol = ds.solve(&m, &k, problem.usersCell[i][0][t], problem.usersCell[i][1][t],
                                                 problem.usersCell[i][2][t]).size() > 0;
 
                     // implementare una strategia per scegliere quanti utenti recuperare
-                    if (foundSol) {
+                    if (ds.isSolved()) {
                         // se è possibile distribuire gli utenti valuta i costi della soluzione su tutti gli istanti temporali
                         objfunct = ds.getX() * problem.costs[i][j][0][t] +
                                    ds.getY() * problem.costs[i][j][1][t] +
@@ -361,7 +497,7 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
 
                     }//if
                 }
-                if(foundSol){
+                if(ds.isSolved()){
                     solution[i][j][0][min_t] = min_x;
                     solution[i][j][1][min_t] = min_y;
                     solution[i][j][2][min_t] = min_z;
@@ -370,8 +506,9 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                         problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
                         demand -= solution[i][j][m][min_t] * problem.n[m];
                         //for debug
-                        problem.activities[j] = demand;
+
                     }
+                    problem.activities[j] = demand;
                 }
                 //check if demand has been satisfied
 
