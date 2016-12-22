@@ -30,6 +30,7 @@ group::group(group group1, int mcm, int source_cell, int dc, int type, int capab
     this->xj = group1.getGroup_capability() / capability;
     if (xj > person_in_cell)
     {
+        //trimming
         xj = person_in_cell;
         xj -= (xj * usercapability % (mcm/usercapability))/usercapability;
         group1.trim(xj * getUsercapability());
