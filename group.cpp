@@ -108,3 +108,9 @@ int group::getDestination_cell() const {
 void group::setDestination_cell(int destination_cell) {
     group::destination_cell = destination_cell;
 }
+
+bool operator==(const group &other) {
+    return (this->time_step == other.time_step && this->destination_cell == other.destination_cell &&
+            this->source_cell == other.source_cell &&
+            this->type_of_people == other.type_of_people); //TODO: try w/o this last one
+}
