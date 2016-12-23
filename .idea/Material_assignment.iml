@@ -3,12 +3,14 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/heuristic.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/simulated_annealing.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/utils.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/group.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/solutionArray.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/group.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/heuristic.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/simulated_annealing.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/solutionArray.h" isTestSource="false" />
     </content>

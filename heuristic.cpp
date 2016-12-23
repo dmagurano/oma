@@ -314,7 +314,7 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
                     }
                 }
             }
-        } while (group1_present == false)
+        } while (group1_present == false);
 
         int destination2;
 
@@ -344,10 +344,10 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
 
         mcm = diophantine_solver::mcm(problem.n[group1_type], problem.n[group2_type]);
 
-        group group1 = group::group(mcm, group1_source_index, j, group1_type,problem.n[group1_type], group1_time, \
+        group group1 = group(mcm, group1_source_index, j, group1_type,problem.n[group1_type], group1_time, \
                                            solution[group1_source_index][j][group1_type][group1_time]);
 
-        group group2 = group::group(group1, mcm, group2_source_index, destination2, group2_type, group2_time);
+        group group2 = group(group1, mcm, group2_source_index, destination2, group2_type, problem.n[group2_type],group2_time, solution[group2_source_index][destination2][group2_type][group2_time]);
 
 
 
