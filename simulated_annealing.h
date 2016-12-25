@@ -27,6 +27,10 @@ public:
 
     bool accept_solution(float new_solution_obj_funct);
 
+    float getCurrent_objective_function() const;
+
+    void setCurrent_objective_function(float current_objective_function);
+
     int getIteration_counter() const;
 
     void setIteration_counter(int iteration_counter);

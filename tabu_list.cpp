@@ -11,21 +11,17 @@ tabu_list::tabu_list(int length) {
     this->tail = nullptr;
 }
 
-move::move(group *group1, group *group2) {
-    this->group1 = group1;
-    this->group2 = group2;
-}
 
 void tabu_list::add_move(group *group1, group *group2) {
-    move mov0 = move(group1, group2);
+    tabu_move mov0 = tabu_move(group1, group2);
     add_move(mov0);
 }
 
-void tabu_list::add_move(move move0) {
-    if (head == nullptr) {
-        *head = move0;
-        *head->next_move = nullptr;
-        *tail = move0;
+void tabu_list::add_move(tabu_move move0) {
+    if (head == NULL) {
+        head = &move0;
+        //head->next_move = NULL;
+        tail = &move0;
     }
     else {
         *tail->next_move = move0;
@@ -37,14 +33,14 @@ void tabu_list::add_move(move move0) {
 }
 
 void tabu_list::chop() {
-    move *chopped = head;
+    tabu_move *chopped = head;
     *head = *head->next_move;
     //TODO: chopped should be deleted
     --counter;
 }
 
 bool tabu_list::check_move(group group1, group group2) {
-    move *rule = head;
+    tabu_move *rule = head;
     while (rule != nullptr) {
         if ((*rule).test(group1, group2))
             return true; //move is tabu
@@ -53,7 +49,7 @@ bool tabu_list::check_move(group group1, group group2) {
     return false; //move is not tabu
 }
 
-bool move::test(group group1, group group2) {
+bool tabu_move::test(group group1, group group2) {
     return (group1 == *this->group1 && group2 == *this->group2) ||
             (group2 == *this->group1 && group1 == *this->group2);
 }

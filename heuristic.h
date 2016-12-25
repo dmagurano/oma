@@ -71,7 +71,7 @@ public:
 
     /**
      * Variables of the problem (X in the model)
-     * i source j destination m type t time
+     * first index is source cell second index is destination third is type fourth is time
      */
     int**** solution;
 

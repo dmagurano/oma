@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <random>
 #include "simulated_annealing.h"
 
 simulated_annealing::simulated_annealing(float cooling_parameter, float T0, int plateau_lenght, float curr_objective_function) : cooling_parameter(
@@ -21,19 +22,20 @@ simulated_annealing::simulated_annealing(float cooling_parameter, float T0, int 
 bool simulated_annealing::accept_solution(float new_solution_obj_funct)
 {
     bool accept = false;
-    if (new_solution_obj_funct > current_objective_function)
+    if (new_solution_obj_funct < current_objective_function)
     {
         current_objective_function = new_solution_obj_funct;
         accept = true;
     }
     else
     {
-        float accepting_probability = (-new_solution_obj_funct - current_objective_function) / current_temperature;
-        float probability = rand() % 101 / 100; // generate float between 0 and 1
+        double accepting_probability = exp((-new_solution_obj_funct - current_objective_function) / current_temperature);
+
+        double probability = ((double) (rand() % 101)) / 100;
         if (probability < accepting_probability)
         {
             accept = true;
-            current_objective_function = new_solution_obj_funct;
+            //current_objective_function = new_solution_obj_funct;
         }
     }
     this->iteration_counter++;
@@ -84,4 +86,12 @@ int simulated_annealing::getPlateau_lenght() const {
 
 void simulated_annealing::setPlateau_lenght(int plateau_lenght) {
     simulated_annealing::plateau_lenght = plateau_lenght;
+}
+
+float simulated_annealing::getCurrent_objective_function() const {
+    return current_objective_function;
+}
+
+void simulated_annealing::setCurrent_objective_function(float current_objective_function) {
+    simulated_annealing::current_objective_function = current_objective_function;
 }

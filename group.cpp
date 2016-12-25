@@ -13,10 +13,12 @@ group::group(int mcm, int sc, int dc, int top, int usercapability, int ts, int n
     this->destination_cell = dc;
     this->usercapability = usercapability;
     int min, max;
-    min = usercapability;
-    max = usercapability * number_of_people_in_cell;
-    xj = rand() % (max - min) + min;
-    xj -= (xj * usercapability % (mcm/usercapability))/usercapability;
+    min = 1;
+    max = number_of_people_in_cell;
+    if (min == max)
+        xj = 1;
+    else
+        xj = rand() % (max - min) + min;
     this->group_capability = xj * usercapability;
 }
 
@@ -43,6 +45,12 @@ void group::trim(int new_capability)
 {
     setXj(new_capability / getUsercapability());
     setGroup_capability(new_capability);
+}
+
+float group::cost(int new_destination, int new_time, double ****costs)
+{
+    //cost is given by new_cost - old_cost
+    return (getXj() * costs[getSource_cell()][new_destination][getType_of_people()][new_time]) - (getXj() * costs[getSource_cell()][getDestination_cell()][getType_of_people()][getTime_step()]);
 }
 
 int group::getSource_cell() const {
@@ -109,8 +117,8 @@ void group::setDestination_cell(int destination_cell) {
     group::destination_cell = destination_cell;
 }
 
-bool operator==(const group &other) {
-    return (this->time_step == other.time_step && this->destination_cell == other.destination_cell &&
-            this->source_cell == other.source_cell &&
-            this->type_of_people == other.type_of_people); //TODO: try w/o this last one
+bool group::operator==(const group &other) {
+    return (this->time_step == other.getTime_step() && this->destination_cell == other.getDestination_cell() &&
+            this->source_cell == other.getSource_cell() &&
+            this->type_of_people == other.getType_of_people()); //TODO: try w/o this last one
 }

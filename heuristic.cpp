@@ -3,6 +3,8 @@
 #include <algorithm>
 #include "heuristic.h"
 #include "group.h"
+#include "tabu_list.h"
+#include "simulated_annealing.h"
 
 
 using namespace std;
@@ -282,9 +284,20 @@ float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data pr
 
 float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data problem)
 {
+    tabu_list ts = tabu_list(rand()%20);
+    float objfun = 0;
+    for (int i = 0; i < nCells; i++)
+        for (int j = 0; j < nCells; j++)
+            for (int m = 0; m < nCustomerTypes; m++)
+                for (int t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    // temperatura iniziale posta a 12400 in modo da avere p0 = 0.5
+    simulated_annealing sa = simulated_annealing(0.4, 12400, rand() % (20 - 10) + 10, objfun);
+
     std::vector<int>::iterator it = indexes.begin();
     std::vector<int>::iterator end = indexes.end();
-    int j, startTime;
+    int j;
     for (; it!=end; it++)
     {
         j = *it; //j origin cell
@@ -349,7 +362,22 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
 
         group group2 = group(group1, mcm, group2_source_index, destination2, group2_type, problem.n[group2_type],group2_time, solution[group2_source_index][destination2][group2_type][group2_time]);
 
+        // calcolo della nuova objective function
+        float new_obj_funct = objfun + group1.cost(group2.getDestination_cell(), group2.getTime_step(), problem.costs) + group2.cost(group1.getDestination_cell(), group1.getTime_step(), problem.costs);
 
+        //inibita momentaneamente la tabu list visto che non funziona
+        //if (sa.accept_solution(new_obj_funct) && ! ts.check_move(group1, group2))
+        if (sa.accept_solution(new_obj_funct))
+        {
+            //ts.add_move(&group1, &group2);
+            sa.setCurrent_objective_function(new_obj_funct);
+            // remove users from the cells
+            solution[group1.getSource_cell()][group1.getDestination_cell()][group1.getType_of_people()][group1.getTime_step()] -= group1.getXj();
+            solution[group2.getSource_cell()][group2.getDestination_cell()][group2.getType_of_people()][group2.getTime_step()] -= group2.getXj();
+            // add users in the cells
+            solution[group1.getSource_cell()][group2.getDestination_cell()][group1.getType_of_people()][group2.getTime_step()] += group1.getXj();
+            solution[group2.getSource_cell()][group1.getDestination_cell()][group2.getType_of_people()][group1.getTime_step()] += group2.getXj();
+        }
 
 
     }
@@ -527,7 +555,7 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                         //for debug
 
                     }
-                    problem.activities[j] = demand;
+                    //problem.activities[j] = demand;
                 }
                 //check if demand has been satisfied
 

@@ -150,13 +150,15 @@ int main(int argc,char *argv[]){
 
 //        _heuristic.solveGreedy(stat,order,problem);
 
+        // lavoriamo con il risultato della diofantina per partire in una tabu search
+
         _heuristic.solveDio(stat,order,problem);
 
+        _heuristic.solveTabu(stat, order, problem);
 
 
 
-        //tabu search first improvement here
-        // lavoriamo con il risultato della diofantina per partire in una tabu search
+
 
 
         _heuristic.hasSolution = true;

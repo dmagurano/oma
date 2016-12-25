@@ -34,6 +34,8 @@ public:
 
     group(group group1, int mcm, int source_cell, int dc, int type, int capability, int time, int person_in_cell); //crea un gruppo simile però da un altra cella calcolata in base alla capacità del group passato come parametro
 
+    float cost(int new_destination, int new_time, double ****costs);
+
     int getGroup_capability() const;
 
     void setGroup_capability(int group_capability);
@@ -60,7 +62,7 @@ public:
 
     void trim(int new_capability);
 
-    bool operator==(const group &other) const;
+    bool operator==(const group &other);
 
 
 };
