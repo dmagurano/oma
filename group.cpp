@@ -1,7 +1,7 @@
 //
 // Created by Francesco on 22/12/2016.
 //
-
+#include <stdio.h>
 #include "group.h"
 #include "solutionArray.h"
 
@@ -12,13 +12,19 @@ group::group(int mcm, int sc, int dc, int top, int usercapability, int ts, int n
     this->time_step = ts;
     this->destination_cell = dc;
     this->usercapability = usercapability;
-    int min, max;
+    int min, max, alpha;
+    //calculating alpha, where xj = alpha * mcm / user_cap
     min = 1;
-    max = number_of_people_in_cell;
+    max = (number_of_people_in_cell * usercapability) / mcm;
+    if (max == 0) {
+        //TODO exception
+        printf("MAX IS 0");
+    }
     if (min == max)
-        xj = 1;
+        alpha = 1;
     else
-        xj = rand() % (max - min) + min;
+        alpha = rand() % (max - min) + min;
+    xj = alpha * mcm / usercapability;
     this->group_capability = xj * usercapability;
 }
 
@@ -33,18 +39,27 @@ group::group(group group1, int mcm, int source_cell, int dc, int type, int capab
     if (xj > person_in_cell)
     {
         //trimming
-        xj = person_in_cell;
-        xj -= (xj * usercapability % (mcm/usercapability))/usercapability;
-        group1.trim(xj * getUsercapability());
+        int gc = person_in_cell * usercapability;
+        gc -= gc % mcm;
+        xj = gc / usercapability;
+        /*xj -= (xj * usercapability % (mcm/usercapability))/usercapability;*/
+        if (!group1.trim(gc)) {
+            //TODO exception
+            printf("COULD NOT TRIM");
+        }
     }
-    this->group_capability = xj * capability;
+    this->group_capability = xj * usercapability;
 
 }
 
-void group::trim(int new_capability)
+bool group::trim(int new_capability)
 {
-    setXj(new_capability / getUsercapability());
+    int new_xj = new_capability / getUsercapability();
+    if (new_xj < 1)
+        return false;
+    setXj(new_xj);
     setGroup_capability(new_capability);
+    return true;
 }
 
 float group::cost(int new_destination, int new_time, double ****costs)

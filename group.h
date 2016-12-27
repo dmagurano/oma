@@ -60,7 +60,7 @@ public:
 
     void setXj(int xj);
 
-    void trim(int new_capability);
+    bool trim(int new_capability);
 
     bool operator==(const group &other);
 
