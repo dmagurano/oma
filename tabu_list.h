@@ -13,7 +13,7 @@ class tabu_list
 private:
     int max_length;
     int counter;
-    tabu_move *head, *tail;
+    tabu_move queue[];
 
     void add_move(tabu_move move0);
 
@@ -24,8 +24,6 @@ public:
     void add_move(group *group1, group *group2);
 
     bool check_move(group group1, group group2);
-
-    void chop();
 };
 
 #endif //COIOTE_HEURISTIC_TABU_LIST_H
