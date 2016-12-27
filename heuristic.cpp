@@ -294,96 +294,103 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
 
     // temperatura iniziale posta a 12400 in modo da avere p0 = 0.5
     simulated_annealing sa = simulated_annealing(0.4, 12400, rand() % (20 - 10) + 10, objfun);
-
-    std::vector<int>::iterator it = indexes.begin();
+    clock_t tStart = clock();
+    std::vector<int>::iterator it;
     std::vector<int>::iterator end = indexes.end();
-    int j;
-    for (; it!=end; it++)
+    while (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 )
     {
-        j = *it; //j origin cell
-        if (problem.activities[j] == 0)
-        {
-            continue;
-        }
-        int group1_type, group2_type;
-        int mcm;
-        bool group1_present, group2_present;
-        int group1_source_index, group2_source_index;
-        int group1_time, group2_time;
+        // generate a visit order
+        int j;
+        it = indexes.begin();
+        std::random_shuffle(indexes.begin(), end);
 
-
-        do {
-            group1_type = rand() % 3;
-            group1_present = false;
-            for (int i = 0; i < nCells && !group1_present; i++) {
-                if (i != j) {
-                    for (int t = 0; t < nTimeSteps && !group1_present; t++) {
-                        if (solution[i][j][group1_type][t] > 0) {
-                            group1_present = true;
-                            group1_source_index = i;
-                            group1_time = t;
-                            break;
-                        }
-                    }
-                }
-            }
-        } while (group1_present == false);
-
-        int destination2;
-
-        do
-        {
-            destination2 = rand() % nCells;
-            if (destination2 == j || problem.activities[destination2] == 0)
-            {
+        for (; it!=end; it++) {
+            j = *it; //j origin cell
+            if (problem.activities[j] == 0) {
                 continue;
             }
-            group2_type = rand() % 3;
-            group2_present = false;
-            for (int i = 0; i < nCells && !group2_present; i++) {
-                if (i != j) {
-                    for (int t = 0; t < nTimeSteps && !group2_present; t++) {
-                        if (solution[i][destination2][group2_type][t] > 0) {
-                            group2_present = true;
-                            group2_source_index = i;
-                            group2_time = t;
-                            break;
+            int group1_type, group2_type;
+            int mcm;
+            bool group1_present, group2_present;
+            int group1_source_index, group2_source_index;
+            int group1_time, group2_time;
+
+
+            do {
+                group1_type = rand() % 3;
+                group1_present = false;
+                for (int i = 0; i < nCells && !group1_present; i++) {
+                    if (i != j) {
+                        for (int t = 0; t < nTimeSteps && !group1_present; t++) {
+                            if (solution[i][j][group1_type][t] > 0) {
+                                group1_present = true;
+                                group1_source_index = i;
+                                group1_time = t;
+                                break;
+                            }
                         }
                     }
                 }
+            } while (group1_present == false);
+
+            int destination2;
+
+            do {
+                destination2 = rand() % nCells;
+                if (destination2 == j || problem.activities[destination2] == 0) {
+                    continue;
+                }
+                group2_type = rand() % 3;
+                group2_present = false;
+                for (int i = 0; i < nCells && !group2_present; i++) {
+                    if (i != j) {
+                        for (int t = 0; t < nTimeSteps && !group2_present; t++) {
+                            if (solution[i][destination2][group2_type][t] > 0) {
+                                group2_present = true;
+                                group2_source_index = i;
+                                group2_time = t;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } while (group2_present == false);
+
+
+            mcm = diophantine_solver::mcm(problem.n[group1_type], problem.n[group2_type]);
+
+            group group1 = group(mcm, group1_source_index, j, group1_type, problem.n[group1_type], group1_time,
+                                 solution[group1_source_index][j][group1_type][group1_time]);
+
+            group group2 = group(group1, mcm, group2_source_index, destination2, group2_type, problem.n[group2_type],
+                                 group2_time, solution[group2_source_index][destination2][group2_type][group2_time]);
+
+            if (group1.getGroup_capability() != group2.getGroup_capability())
+                // dovremmo pensare di rivisitare la cella
+                continue;
+            // calcolo della nuova objective function
+            float new_obj_funct = objfun + group1.cost(group2.getDestination_cell(), group2.getTime_step(), problem.costs) +
+                    group2.cost(group1.getDestination_cell(), group1.getTime_step(), problem.costs);
+
+            //inibita momentaneamente la tabu list visto che non funziona
+            if (sa.accept_solution(new_obj_funct) && !ts.check_move(group1, group2))
+            {
+                ts.add_move(&group1, &group2);
+                sa.setCurrent_objective_function(new_obj_funct);
+                objfun = new_obj_funct;
+                // remove users from the cells
+                solution[group1.getSource_cell()][group1.getDestination_cell()][group1.getType_of_people()][group1.getTime_step()] -= group1.getXj();
+                solution[group2.getSource_cell()][group2.getDestination_cell()][group2.getType_of_people()][group2.getTime_step()] -= group2.getXj();
+                // add users in the cells
+                solution[group1.getSource_cell()][group2.getDestination_cell()][group1.getType_of_people()][group2.getTime_step()] += group1.getXj();
+                solution[group2.getSource_cell()][group1.getDestination_cell()][group2.getType_of_people()][group1.getTime_step()] += group2.getXj();
             }
-        } while (group2_present == false);
 
-
-        mcm = diophantine_solver::mcm(problem.n[group1_type], problem.n[group2_type]);
-
-        group group1 = group(mcm, group1_source_index, j, group1_type,problem.n[group1_type], group1_time, solution[group1_source_index][j][group1_type][group1_time]);
-
-        group group2 = group(group1, mcm, group2_source_index, destination2, group2_type, problem.n[group2_type],group2_time, solution[group2_source_index][destination2][group2_type][group2_time]);
-
-        if (group1.getGroup_capability() != group2.getGroup_capability())
-            // dovremmo pensare di rivisitare la cella
-            continue;
-        // calcolo della nuova objective function
-        float new_obj_funct = objfun + group1.cost(group2.getDestination_cell(), group2.getTime_step(), problem.costs) + group2.cost(group1.getDestination_cell(), group1.getTime_step(), problem.costs);
-
-        //inibita momentaneamente la tabu list visto che non funziona
-        if (sa.accept_solution(new_obj_funct) && ! ts.check_move(group1, group2))
-        //if (sa.accept_solution(new_obj_funct))
-        {
-            ts.add_move(&group1, &group2);
-            sa.setCurrent_objective_function(new_obj_funct);
-            objfun = new_obj_funct;
-            // remove users from the cells
-            solution[group1.getSource_cell()][group1.getDestination_cell()][group1.getType_of_people()][group1.getTime_step()] -= group1.getXj();
-            solution[group2.getSource_cell()][group2.getDestination_cell()][group2.getType_of_people()][group2.getTime_step()] -= group2.getXj();
-            // add users in the cells
-            solution[group1.getSource_cell()][group2.getDestination_cell()][group1.getType_of_people()][group2.getTime_step()] += group1.getXj();
-            solution[group2.getSource_cell()][group1.getDestination_cell()][group2.getType_of_people()][group1.getTime_step()] += group2.getXj();
         }
-
-
     }
+    // return obj_fun
+    stat.push_back(objfun);
+    return floor(objfun);
 
         /*int min_task[3], max_task[3];
 
@@ -454,7 +461,6 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
             group_activities_destination += rand() % (max_task[i] - min_task[i]) + min_task[i];
         }
     }*/
-
 
 }
 
