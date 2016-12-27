@@ -7,13 +7,14 @@
 
 #include "group.h"
 #include "tabu_move.h"
+#include <iostream>
+#include <vector>
 
 class tabu_list
 {
 private:
     int max_length;
-    int counter;
-    tabu_move queue[];
+    std::vector<tabu_move> queue;
 
     void add_move(tabu_move move0);
 

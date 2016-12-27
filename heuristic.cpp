@@ -343,7 +343,7 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
             for (int i = 0; i < nCells && !group2_present; i++) {
                 if (i != j) {
                     for (int t = 0; t < nTimeSteps && !group2_present; t++) {
-                        if (solution[i][destination2][group1_type][t] > 0) {
+                        if (solution[i][destination2][group2_type][t] > 0) {
                             group2_present = true;
                             group2_source_index = i;
                             group2_time = t;
@@ -357,20 +357,23 @@ float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data probl
 
         mcm = diophantine_solver::mcm(problem.n[group1_type], problem.n[group2_type]);
 
-        group group1 = group(mcm, group1_source_index, j, group1_type,problem.n[group1_type], group1_time, \
-                                           solution[group1_source_index][j][group1_type][group1_time]);
+        group group1 = group(mcm, group1_source_index, j, group1_type,problem.n[group1_type], group1_time, solution[group1_source_index][j][group1_type][group1_time]);
 
         group group2 = group(group1, mcm, group2_source_index, destination2, group2_type, problem.n[group2_type],group2_time, solution[group2_source_index][destination2][group2_type][group2_time]);
 
+        if (group1.getGroup_capability() != group2.getGroup_capability())
+            // dovremmo pensare di rivisitare la cella
+            continue;
         // calcolo della nuova objective function
         float new_obj_funct = objfun + group1.cost(group2.getDestination_cell(), group2.getTime_step(), problem.costs) + group2.cost(group1.getDestination_cell(), group1.getTime_step(), problem.costs);
 
         //inibita momentaneamente la tabu list visto che non funziona
-        //if (sa.accept_solution(new_obj_funct) && ! ts.check_move(group1, group2))
-        if (sa.accept_solution(new_obj_funct))
+        if (sa.accept_solution(new_obj_funct) && ! ts.check_move(group1, group2))
+        //if (sa.accept_solution(new_obj_funct))
         {
-            //ts.add_move(&group1, &group2);
+            ts.add_move(&group1, &group2);
             sa.setCurrent_objective_function(new_obj_funct);
+            objfun = new_obj_funct;
             // remove users from the cells
             solution[group1.getSource_cell()][group1.getDestination_cell()][group1.getType_of_people()][group1.getTime_step()] -= group1.getXj();
             solution[group2.getSource_cell()][group2.getDestination_cell()][group2.getType_of_people()][group2.getTime_step()] -= group2.getXj();

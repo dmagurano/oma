@@ -24,7 +24,7 @@ bool simulated_annealing::accept_solution(float new_solution_obj_funct)
     bool accept = false;
     if (new_solution_obj_funct < current_objective_function)
     {
-        current_objective_function = new_solution_obj_funct;
+        //current_objective_function = new_solution_obj_funct;
         accept = true;
     }
     else

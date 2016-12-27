@@ -19,6 +19,14 @@ public:
 
     bool test(group group1, group group2);
 
+    group *getGroup1() const;
+
+    void setGroup1(group *group1);
+
+    group *getGroup2() const;
+
+    void setGroup2(group *group2);
+
 };
 
 
