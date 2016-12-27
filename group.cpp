@@ -18,7 +18,7 @@ group::group(int mcm, int sc, int dc, int top, int usercapability, int ts, int n
     max = (number_of_people_in_cell * usercapability) / mcm;
     if (max == 0) {
         //TODO exception
-        printf("MAX IS 0");
+        //printf("MAX IS 0");
     }
     if (min == max)
         alpha = 1;
@@ -45,7 +45,7 @@ group::group(group group1, int mcm, int source_cell, int dc, int type, int capab
         /*xj -= (xj * usercapability % (mcm/usercapability))/usercapability;*/
         if (!group1.trim(gc)) {
             //TODO exception
-            printf("COULD NOT TRIM");
+            //printf("COULD NOT TRIM");
         }
     }
     this->group_capability = xj * usercapability;
