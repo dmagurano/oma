@@ -71,7 +71,7 @@ int main(int argc,char *argv[]){
         nCells = _heuristic.nCells;
         solution = _heuristic.solution;
 
-        int popsize  = 100;
+        int popsize  = 5;
         int ngen     = 1000000;
         float pmut   = 0.01;
         float pcross = 0.9;
@@ -83,23 +83,23 @@ int main(int argc,char *argv[]){
         genome.crossover(GAListGenome<int>::PartialMatchCrossover);
 
 
-//        GASimpleGA ga(genome);// create the GA
-//
-//
-//        ga.populationSize(popsize);
-//        ga.nGenerations(ngen);
-//        ga.pMutation(pmut);
-//        ga.pCrossover(pcross);
+        GASimpleGA ga(genome);// create the GA
 
-        GASteadyStateGA ga(genome);
 
-        GASigmaTruncationScaling trunc;
-        ga.scaling(trunc);
-        ga.set(gaNpopulationSize, 20);
-        ga.set(gaNpCrossover, 0.6);
-        ga.set(gaNpMutation, 0.1);
-        ga.set(gaNnGenerations, 10000);
-        ga.set(gaNpReplacement, 0.1);
+        ga.populationSize(popsize);
+        ga.nGenerations(ngen);
+        ga.pMutation(pmut);
+        ga.pCrossover(pcross);
+
+//        GASteadyStateGA ga(genome);
+//
+//        GASigmaTruncationScaling trunc;
+//        ga.scaling(trunc);
+//        ga.set(gaNpopulationSize, 1000);
+//        ga.set(gaNpCrossover, 0.6);
+//        ga.set(gaNpMutation, 0.1);
+//        ga.set(gaNnGenerations, 10000);
+//        ga.set(gaNpReplacement, 0.1);
 
 
         ga.minimize();
@@ -119,10 +119,10 @@ int main(int argc,char *argv[]){
 		cout << "best individual is " << ga.statistics().bestIndividual() << "\n\n";
 		cout << ga.statistics() << "\n";
 
-//        for(int i=0; i<ga.statistics().bestPopulation().size(); i++){
-//                genome = ga.statistics().bestPopulation().individual(i);
-//                cout << genome << "\n";
-//        }
+        for(int i=0; i<ga.statistics().bestPopulation().size(); i++){
+                genome = ga.statistics().bestPopulation().individual(i);
+                cout << genome << "\n";
+        }
 
         int objFun = ga.statistics().bestIndividual().score();
 
@@ -148,13 +148,13 @@ int main(int argc,char *argv[]){
 
         cout << "\n";
 
-//        _heuristic.solveGreedy(stat,order,problem);
+      _heuristic.solveGreedy3(stat,order,problem);
 
         // lavoriamo con il risultato della diofantina per partire in una tabu search
 
-        _heuristic.solveDio(stat,order,problem);
+       //_heuristic.solveDio(stat,order,_heuristic.getProblem());
 
-        _heuristic.solveTabu(stat, order, problem);
+       // _heuristic.solveTabu(stat, order, problem);
 
 
 
@@ -168,6 +168,9 @@ int main(int argc,char *argv[]){
 		_heuristic.getStatSolution(stat);
 		// Write KPI of solution
         string instanceName = splitpath(_inPath);
+
+        cout << "Instance name: " << instanceName << endl;
+
         _heuristic.writeKPI(_outPath, instanceName, stat);
 		// Write solution
 		if(!_solPath.empty())
@@ -195,7 +198,7 @@ int main(int argc,char *argv[]){
 	return 0;
 }
 
-float Objective(GAGenome& g){
+float Objective_greedyrand(GAGenome& g){
 
     GAListGenome<int> & genome = (GAListGenome<int> &)g;
 
@@ -260,7 +263,9 @@ float Objective(GAGenome& g){
                 for (t=0; t<nTimeSteps && notSatisfied; t++)
                 {
 
-                    if (!(j-w < 0) && demand > 0)
+                    bool random = GAFlipCoin(0.5);
+
+                    if (!(j-w < 0) && demand > 0 && !random)
                     {
                         i = j-w;
                         if (demand>problem.usersCell[i][m][t]*problem.n[m])
@@ -284,7 +289,7 @@ float Objective(GAGenome& g){
                             //continue;
                         }
                     }
-                    if (!(j+w >= nCells) && demand > 0)
+                    if (!(j+w >= nCells) && demand > 0 && random)
                     {
                         i = j+w;
                         if (demand>problem.usersCell[i][m][t]*problem.n[m])
@@ -335,7 +340,367 @@ float Objective(GAGenome& g){
 
 }
 
-float Objective2(GAGenome& g){
+float Objective_dio(GAGenome& g){
+
+    GAListGenome<int> & genome = (GAListGenome<int> &)g;
+
+    auto a = chrono::high_resolution_clock::now().time_since_epoch();
+    auto now_ms = std::chrono::duration_cast<std::chrono::microseconds>(a);
+    srand(now_ms.count());
+
+
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
+
+    int  objfun = 0;
+    bool feasible = true;
+
+    Data problem = _heuristic.getProblem();
+
+    GAListIter<int> iter(genome);
+    vector<int> indexes;
+    int *cur, *head;
+    if((head=iter.head()) != NULL) indexes.push_back(*head);
+    for(cur=iter.next(); cur && cur != head; cur=iter.next())
+        indexes.push_back(*cur);
+
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    for (; it!=end; it++)
+    {
+        j = *it;
+        notSatisfied = true;
+        int demand = problem.activities[j];
+
+        again: ;
+        // w -> dim|i-j|
+        for (w=1; w<nCells && notSatisfied; w++)
+        {
+            if (j-w < 0 && j+w >= nCells)
+            {
+                //feasible = false;
+                break;
+            }     // ----------------------------- not feasible
+
+            // select a source nearby
+            int i;
+            for (int c = 0; c < 2 && demand > 0; c++)
+            {
+
+
+                if (c == 0)
+                    i = j + w;
+                else if ( c == 1)
+                    i = j - w;
+                //per evitare di sforare l'index
+                if (j+w >= nCells)
+                    i = j - w;
+                if (j-w < 0)
+                    i = j + w;
+
+                float objfunct = 0;
+                float min = INT64_MAX;
+                int min_x, min_y, min_z, min_t;
+                diophantine_solver ds = diophantine_solver(problem.n[0], problem.n[1], problem.n[2], demand);
+//                int m = 1000, k = 1000;
+                int m=rand()%10,k=rand()%10;
+                bool foundSol = false;
+                for (int t = 0; t < nTimeSteps; t++)
+                {
+                    if (problem.usersCell[i][0][t] == 0 && problem.usersCell[i][1][t] == 0 && problem.usersCell[i][2][t] == 0)
+                        continue;
+                    objfunct = 0;
+                    ds.setTentativi(100);
+                    float w1, w2, w3;
+                    w3 = problem.costs[i][j][0][t] + problem.costs[i][j][1][t] + problem.costs[i][j][2][t];
+                    w1 = problem.costs[i][j][0][t] / w3;
+                    w2 = problem.costs[i][j][1][t] / w3;
+                    w3 = problem.costs[i][j][2][t] / w3;
+                    ds.setWeightX(w1);
+                    ds.setWeightY(w2);
+                    ds.setWeightZ(w3);
+                    foundSol = ds.solve(&m, &k, problem.usersCell[i][0][t], problem.usersCell[i][1][t],
+                                        problem.usersCell[i][2][t]).size() > 0;
+
+                    // implementare una strategia per scegliere quanti utenti recuperare
+                    if (ds.isSolved()) {
+                        // se è possibile distribuire gli utenti valuta i costi della soluzione su tutti gli istanti temporali
+                        objfunct = ds.getX() * problem.costs[i][j][0][t] +
+                                   ds.getY() * problem.costs[i][j][1][t] +
+                                   ds.getZ() * problem.costs[i][j][2][t];
+                        if (objfunct < min) {
+                            min = objfunct;
+                            min_x = ds.getX();
+                            min_y = ds.getY();
+                            min_z = ds.getZ();
+                            min_t = t;
+                        }
+
+                    }
+                }
+                if(ds.isSolved()){
+                    solution[i][j][0][min_t] = min_x;
+                    solution[i][j][1][min_t] = min_y;
+                    solution[i][j][2][min_t] = min_z;
+
+                    for (int m = 0; m < nCustomerTypes; m++) {
+                        problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
+                        demand -= solution[i][j][m][min_t] * problem.n[m];
+                        //for debug
+
+                    }
+                    problem.activities[j] = demand;
+                }
+                //check if demand has been satisfied
+
+                if(demand <= 0){
+                    notSatisfied = false;
+                    break;
+                }
+
+
+
+            }
+
+
+
+
+        }// for window
+
+        if (demand > 0 && demand < 200) {
+            demand++;
+            goto again;
+        }
+
+        if (demand >= 200){
+            feasible = false;
+        }
+
+
+        //next j
+
+    }
+
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (!feasible){
+        objfun = 10000000;
+    }
+
+
+
+
+    return (float) floor(objfun);
+
+
+}
+
+float Objective(GAGenome& g){
+
+    GAListGenome<int> & genome = (GAListGenome<int> &)g;
+
+    auto a = chrono::high_resolution_clock::now().time_since_epoch();
+    auto now_ms = std::chrono::duration_cast<std::chrono::microseconds>(a);
+    srand(now_ms.count());
+
+
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
+
+    int  objfun = 0;
+    bool feasible = true;
+
+    Data problem = _heuristic.getProblem();
+
+    GAListIter<int> iter(genome);
+    vector<int> indexes;
+    int *cur, *head;
+    if((head=iter.head()) != NULL) indexes.push_back(*head);
+    for(cur=iter.next(); cur && cur != head; cur=iter.next())
+        indexes.push_back(*cur);
+
+    bool notSolved = true;
+    clock_t tStart = clock();
+
+    while(notSolved && (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 )) {
+
+        std::random_shuffle(indexes.begin(), indexes.end());
+        std::vector<int>::iterator it = indexes.begin();
+        std::vector<int>::iterator end = indexes.end();
+//        std::vector<int>::iterator it3 ;
+//        for(it3=indexes.begin(); it3!= indexes.end();it3++){
+//            cout << " " << *it3;
+//        }
+//        cout << endl;
+
+        for (; it != end; it++) {
+            j = *it;
+            //notSatisfied = true;
+            int demand = problem.activities[j];
+            if(demand <= 0)
+                continue;
+            // w -> dim|i-j|
+            int minCost = 100000;
+            int min_i = 0;
+            int min_m = 0;
+            int min_t = 0;
+            for (w = 1; w < nCells; w++) {
+                if (j - w < 0 && j + w >= nCells) {
+                    //feasible = false;
+                    break;
+                }     // ----------------------------- not feasible
+
+
+
+                //vedo qual'è il costo minore nella finestra w
+                vector<int> customers;
+                for (int cust = 0; cust < nCustomerTypes; cust++)
+                    customers.push_back(cust);
+
+
+                random_shuffle(customers.begin(), customers.end());
+//                for (m=0; m < nCustomerTypes; m++){
+                for (vector<int>::iterator cIt = customers.begin(); cIt != customers.end(); cIt++) {
+
+                    m = *cIt;
+                    //per non sforare con i task
+                    //                if (demand < problem.n[m])
+                    //                    continue;
+
+                    for (t = 0; t < nTimeSteps; t++) {
+                        if (!(j - w < 0)) {
+                            i = j - w;
+                            if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
+                                problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
+                                if (problem.costs[i][j][m][t] == minCost) {
+                                    if ((((double) (rand() % 101)) / 100) < 1) {
+                                        minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                        min_i = i;
+                                        min_m = m;
+                                        min_t = t;
+                                    }
+                                } else {
+                                    minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                    min_i = i;
+                                    min_m = m;
+                                    min_t = t;
+                                }
+
+                            }
+                        }
+                        if (!(j + w >= nCells)) {
+                            i = j + w;
+                            if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
+                                problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
+                                if (problem.costs[i][j][m][t] == minCost) {
+                                    if ((((double) (rand() % 101)) / 100) < 1) {
+                                        minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                        min_i = i;
+                                        min_m = m;
+                                        min_t = t;
+                                    }
+                                } else {
+                                    minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                    min_i = i;
+                                    min_m = m;
+                                    min_t = t;
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+
+                //            int sent = demand / problem.n[min_m];
+                //            if (sent == 0)
+                //                sent++;
+                //            if(sent > problem.usersCell[min_i][min_m][min_t]){
+                //                sent = problem.usersCell[min_i][min_m][min_t];
+                //            }
+
+                //assegno solo un utente per volta poi ricomincio a ciclare su j
+
+                if (problem.usersCell[min_i][min_m][min_t] == 0)
+                    continue; // non ci sono utenti, allarga la finestra w
+
+                if (w >= 0.15 * nCells) {
+                    solution[min_i][j][min_m][min_t]++;
+                    problem.usersCell[min_i][min_m][min_t]--;
+                    demand -= problem.n[min_m];
+                    problem.activities[j] = demand;
+                    break;
+                }
+
+
+
+
+//                // controllo se ho soddisfatto le richieste
+////                if (demand <= 0)
+////                    notSatisfied = false;
+//
+//                problem.activities[j] = demand;
+//
+//                break; // ho assegnato un utente, passo alla prossima j
+            }
+
+//            solution[min_i][j][min_m][min_t]++;
+//            problem.usersCell[min_i][min_m][min_t]--;
+//            demand -= problem.n[min_m];
+//            problem.activities[j] = demand;
+
+        }
+
+        bool again = false;
+        //controllo se ho risolto il problema
+        std::vector<int>::iterator it2 ;
+        for(it2=indexes.begin(); it2!= indexes.end();it2++){
+            if(problem.activities[*it2] > 0){
+                again = true;
+            }
+        }
+
+        if(!again) //tutte richieste soddisfatte
+            notSolved = false;
+
+
+    }//while
+
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (notSolved){
+        objfun = 10000000;
+    }
+
+
+
+
+    return (float) floor(objfun);
+
+
+}
+
+float Objective_realgreedy1(GAGenome& g){
 
     GAListGenome<int> & genome = (GAListGenome<int> &)g;
 
@@ -380,75 +745,61 @@ float Objective2(GAGenome& g){
                 break;
             }     // ----------------------------- not feasible
 
-            // select a source nearby
-            int i;
-            for (int c = 0; c < 2 && demand > 0; c++)
+            int minCost = 100000;
+            int min_i = 0;
+            int min_m = 0;
+            int min_t = 0;
+
+            for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
             {
+                //per non sforare con i task
+//                if (demand < problem.n[m])
+//                    continue;
 
-
-                if (c == 0)
-                    i = j + w;
-                else if ( c == 1)
-                    i = j - w;
-                //per evitare di sforare l'index
-                if (j+w >= nCells)
-                    i = j - w;
-                if (j-w < 0)
-                    i = j + w;
-
-                float objfunct = 0;
-                float min = INT64_MAX;
-                int min_x, min_y, min_z, min_t;
-                diophantine_solver ds = diophantine_solver(problem.n[0], problem.n[1], problem.n[2], demand);
-//                int m = 1000, k = 1000;
-                int m=0,k=0;
-                for (int t = 0; t < nTimeSteps; t++)
+                for (t=0; t<nTimeSteps && notSatisfied; t++)
                 {
-                    objfunct = 0;
-                    ds.setTentativi(1000);
-                    // implementare una strategia per scegliere quanti utenti recuperare
-                    if (ds.solve(&m, &k, problem.usersCell[i][0][t], problem.usersCell[i][1][t],
-                                 problem.usersCell[i][2][t]).size() > 0)
+                    if (!(j-w < 0))
                     {
-                        // se è possibile distribuire gli utenti valuta i costi della soluzione su tutti gli istanti temporali
-                        objfunct = ds.getX() * problem.costs[i][j][0][t] +
-                                   ds.getY() * problem.costs[i][j][1][t] +
-                                   ds.getZ() * problem.costs[i][j][2][t];
-                        if (objfunct < min)
-                        {
-                            min = objfunct;
-                            min_x = ds.getX();
-                            min_y = ds.getY();
-                            min_z = ds.getZ();
+                        i = j-w;
+                        if(problem.costs[i][j][m][t] < minCost && problem.usersCell[i][m][t] > 0){
+                            minCost = problem.costs[i][j][m][t];
+                            min_i = i;
+                            min_m = m;
                             min_t = t;
                         }
                     }
+                    if (!(j+w >= nCells))
+                    {
+                        i = j + w;
+                        if(problem.costs[i][j][m][t] < minCost && problem.usersCell[i][m][t] > 0){
+                            minCost = problem.costs[i][j][m][t];
+                            min_i = i;
+                            min_m = m;
+                            min_t = t;
+                        }
+
+                    }
                 }
-
-                solution[i][j][0][min_t] = min_x;
-                solution[i][j][1][min_t] = min_y;
-                solution[i][j][2][min_t] = min_z;
-
-                for (int m = 0; m < nCustomerTypes; m++) {
-                    problem.usersCell[i][m][min_t] -= solution[i][j][m][min_t];
-                    demand -= solution[i][j][m][min_t] * problem.n[m];
-                    //for debug
-                    problem.activities[j] = demand;
-                }
-
-                //check if demand has been satisfied
-
-                if(demand <= 0){
-                    notSatisfied = false;
-                    break;
-                }
-
-
             }
 
 
+            int sent = demand / problem.n[min_m];
+            if (sent == 0)
+                sent++;
+            if(sent > problem.usersCell[min_i][min_m][min_t]){
+                sent = problem.usersCell[min_i][min_m][min_t];
+            }
+            solution[min_i][j][min_m][min_t] += sent;
+            problem.usersCell[min_i][min_m][min_t] -= sent;
+            demand -= sent*problem.n[min_m];
 
 
+
+            // controllo se ho soddisfatto le richieste
+            if(demand <= 0)
+                notSatisfied = false;
+            else //for debug
+                problem.activities[j] = demand;
         }
     }
 

@@ -118,6 +118,9 @@ public:
     void writeSolution(string path);
 
     float solveGreedy(vector<double>& stat, vector<int> indexes, Data problem);
+    float solveGreedy2(vector<double>& stat, vector<int> indexes, Data problem);
+    float solveGreedy3(vector<double>& stat, vector<int> indexes, Data problem);
+    float solveGreedy4(vector<double>& stat, vector<int> indexes, Data problem);
     float solveDio( vector<double>& stat, vector<int> indexes, Data problem);
     float solveTabu( vector<double>& stat, vector<int> indexes, Data problem);
     /**

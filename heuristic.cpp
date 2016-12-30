@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include <algorithm>
+#include <chrono>
 #include "heuristic.h"
 #include "group.h"
 #include "tabu_list.h"
@@ -282,6 +283,511 @@ float Heuristic::solveGreedy( vector<double>& stat, vector<int> indexes, Data pr
     return (float) floor(objfun);
 }
 
+float Heuristic::solveGreedy2( vector<double>& stat, vector<int> indexes, Data problem) {
+
+    clock_t tStart = clock();
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
+
+    int  objfun = 0;
+    bool feasible = true;
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    // per ogni dest:
+    for (; it!=end; it++)
+    {
+        j = *it;
+        notSatisfied = true;
+        int demand = problem.activities[j];
+        // w -> dim|i-j|
+        for (w=1; w<nCells && notSatisfied; w++)
+        {
+            if (j-w < 0 && j+w >= nCells)
+            {
+                feasible = false;
+                break;
+            }     // ----------------------------- not feasible
+
+            int minCost = 100000;
+            int min_i = 0;
+            int min_m = 0;
+            int min_t = 0;
+
+            for (m=nCustomerTypes-1; m >= 0 && notSatisfied; m--)
+            {
+                //per non sforare con i task
+//                if (demand < problem.n[m])
+//                    continue;
+
+                for (t = 0; t < nTimeSteps; t++) {
+                    if (!(j - w < 0)) {
+                        i = j - w;
+                        if ( (problem.costs[i][j][m][t]/problem.n[m]) < minCost && problem.usersCell[i][m][t] > 0) {
+                            minCost = (problem.costs[i][j][m][t]/problem.n[m]);
+                            min_i = i;
+                            min_m = m;
+                            min_t = t;
+                        }
+                    }
+                    if (!(j + w >= nCells)) {
+                        i = j + w;
+                        if ( (problem.costs[i][j][m][t]/problem.n[m]) < minCost && problem.usersCell[i][m][t] > 0) {
+                            minCost = (problem.costs[i][j][m][t]/problem.n[m]);
+                            min_i = i;
+                            min_m = m;
+                            min_t = t;
+                        }
+
+                    }
+                }
+            }
+
+
+            int sent = demand / problem.n[min_m];
+            if (sent == 0)
+                sent++;
+            if(sent > problem.usersCell[min_i][min_m][min_t]){
+                sent = problem.usersCell[min_i][min_m][min_t];
+            }
+            solution[min_i][j][min_m][min_t] += sent;
+            problem.usersCell[min_i][min_m][min_t] -= sent;
+            demand -= sent*problem.n[min_m];
+
+
+
+            // controllo se ho soddisfatto le richieste
+            if(demand <= 0)
+                notSatisfied = false;
+             //for debug
+             problem.activities[j] = demand;
+        }
+    }
+
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (!feasible) {
+        cout << "Not feasible solution!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
+
+
+        for(int m=0;m<nCustomerTypes;m++)
+            for(int t=0;t<nTimeSteps;t++){
+                cout << "User type: " << m << ", time: " << t << endl;
+                for(int i=0; i<nCells; i++)
+                    cout << problem.usersCell[i][m][t] << " ";
+                cout << endl;
+            }
+
+
+
+    }else{
+        cout << "FEASIBLE!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
+    }
+    stat.push_back(objfun);
+    stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
+
+    hasSolution=true;
+
+
+    return (float) floor(objfun);
+}
+
+float Heuristic::solveGreedy3( vector<double>& stat, vector<int> indexes, Data problem) {
+    auto a = chrono::high_resolution_clock::now().time_since_epoch();
+    auto now_ms = std::chrono::duration_cast<std::chrono::microseconds>(a);
+    srand(now_ms.count());
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
+
+    int  objfun = 0;
+    bool feasible = true;
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    // per ogni dest:
+    bool notSolved = true;
+    clock_t tStart = clock();
+
+    while(notSolved && (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 )) {
+
+        std::random_shuffle(indexes.begin(), indexes.end());
+        std::vector<int>::iterator it = indexes.begin();
+        std::vector<int>::iterator end = indexes.end();
+//        std::vector<int>::iterator it3 ;
+//        for(it3=indexes.begin(); it3!= indexes.end();it3++){
+//            cout << " " << *it3;
+//        }
+//        cout << endl;
+
+        for (; it != end; it++) {
+            j = *it;
+            //notSatisfied = true;
+            int demand = problem.activities[j];
+            if(demand <= 0)
+                continue;
+            // w -> dim|i-j|
+            int minCost = 100000;
+            int min_i = 0;
+            int min_m = 0;
+            int min_t = 0;
+            for (w = 1; w < nCells; w++) {
+                if (j - w < 0 && j + w >= nCells) {
+                    //feasible = false;
+                    break;
+                }     // ----------------------------- not feasible
+
+
+
+                //vedo qual'è il costo minore nella finestra w
+
+                for (m = 0; m < nCustomerTypes; m++) {
+                    //per non sforare con i task
+                    //                if (demand < problem.n[m])
+                    //                    continue;
+
+                    for (t = 0; t < nTimeSteps; t++) {
+                        if (!(j - w < 0)) {
+                            i = j - w;
+                            if ( (problem.costs[i][j][m][t]/problem.n[m]) <= minCost && problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand ) {
+                                minCost = (problem.costs[i][j][m][t]/problem.n[m]);
+                                min_i = i;
+                                min_m = m;
+                                min_t = t;
+                            }
+                        }
+                        if (!(j + w >= nCells)) {
+                            i = j + w;
+                            if ( (problem.costs[i][j][m][t]/problem.n[m]) <= minCost && problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand ) {
+                                minCost = (problem.costs[i][j][m][t]/problem.n[m]);
+                                min_i = i;
+                                min_m = m;
+                                min_t = t;
+                            }
+
+                        }
+                    }
+                }
+
+
+                //            int sent = demand / problem.n[min_m];
+                //            if (sent == 0)
+                //                sent++;
+                //            if(sent > problem.usersCell[min_i][min_m][min_t]){
+                //                sent = problem.usersCell[min_i][min_m][min_t];
+                //            }
+
+                //assegno solo un utente per volta poi ricomincio a ciclare su j
+
+//                if(problem.usersCell[min_i][min_m][min_t] == 0)
+//                    continue; // non ci sono utenti, allarga la finestra w
+//
+
+
+
+
+//                // controllo se ho soddisfatto le richieste
+////                if (demand <= 0)
+////                    notSatisfied = false;
+//
+//                problem.activities[j] = demand;
+//
+//                break; // ho assegnato un utente, passo alla prossima j
+            }
+            solution[min_i][j][min_m][min_t]++;
+            problem.usersCell[min_i][min_m][min_t]--;
+            demand -= problem.n[min_m];
+            problem.activities[j] = demand;
+
+        }
+
+        bool again = false;
+        //controllo se ho risolto il problema
+        std::vector<int>::iterator it2 ;
+        for(it2=indexes.begin(); it2!= indexes.end();it2++){
+            if(problem.activities[*it2] > 0){
+                again = true;
+            }
+        }
+
+        if(!again) //tutte richieste soddisfatte
+            notSolved = false;
+
+
+    }//while
+
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (notSolved) {
+        cout << "Not feasible solution!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
+
+
+        for(int m=0;m<nCustomerTypes;m++)
+            for(int t=0;t<nTimeSteps;t++){
+                cout << "User type: " << m << ", time: " << t << endl;
+                for(int i=0; i<nCells; i++)
+                    cout << problem.usersCell[i][m][t] << " ";
+                cout << endl;
+            }
+
+
+
+    }else{
+        cout << "FEASIBLE!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
+    }
+
+    stat.push_back(objfun);
+    stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
+
+    hasSolution=true;
+
+
+    return (float) floor(objfun);
+}
+
+float Heuristic::solveGreedy4( vector<double>& stat, vector<int> indexes, Data problem) {
+    auto a = chrono::high_resolution_clock::now().time_since_epoch();
+    auto now_ms = std::chrono::duration_cast<std::chrono::microseconds>(a);
+    srand(now_ms.count());
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int i, j, m, t, w;
+    bool notSatisfied;
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    solution[i][j][m][t] = 0;
+
+    int  objfun = 0;
+    bool feasible = true;
+    std::vector<int>::iterator it = indexes.begin();
+    std::vector<int>::iterator end = indexes.end();
+    // per ogni dest:
+    bool notSolved = true;
+    clock_t tStart = clock();
+
+    while(notSolved && (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 )) {
+
+        std::random_shuffle(indexes.begin(), indexes.end());
+        std::vector<int>::iterator it = indexes.begin();
+        std::vector<int>::iterator end = indexes.end();
+//        std::vector<int>::iterator it3 ;
+//        for(it3=indexes.begin(); it3!= indexes.end();it3++){
+//            cout << " " << *it3;
+//        }
+//        cout << endl;
+
+        for (; it != end; it++) {
+            j = *it;
+            //notSatisfied = true;
+            int demand = problem.activities[j];
+            if(demand <= 0)
+                continue;
+            // w -> dim|i-j|
+            int minCost = 100000;
+            int min_i = 0;
+            int min_m = 0;
+            int min_t = 0;
+            for (w = 1; w < nCells; w++) {
+                if (j - w < 0 && j + w >= nCells) {
+                    //feasible = false;
+                    break;
+                }     // ----------------------------- not feasible
+
+
+
+                //vedo qual'è il costo minore nella finestra w
+
+                for (m = nCustomerTypes - 1; m >= 0; m--) {
+                    //per non sforare con i task
+                    //                if (demand < problem.n[m])
+                    //                    continue;
+
+                    for (t = 0; t < nTimeSteps; t++) {
+                        if (!(j - w < 0)) {
+                            i = j - w;
+                            if ( (problem.costs[i][j][m][t]/problem.n[m]) <= minCost && problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand ) {
+                                if (problem.costs[i][j][m][t] == minCost){
+                                    if ( ( ((double) (rand() % 101)) / 100 ) < 0.6) {
+                                        minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                        min_i = i;
+                                        min_m = m;
+                                        min_t = t;
+                                    }
+                                }
+                                else
+                                {
+                                    minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                    min_i = i;
+                                    min_m = m;
+                                    min_t = t;
+                                }
+
+                            }
+                        }
+                        if (!(j + w >= nCells)) {
+                            i = j + w;
+                            if ( (problem.costs[i][j][m][t]/problem.n[m]) <= minCost && problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand ) {
+                                if (problem.costs[i][j][m][t] == minCost){
+                                    if ( ( ((double) (rand() % 101)) / 100 ) < 0.6) {
+                                        minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                        min_i = i;
+                                        min_m = m;
+                                        min_t = t;
+                                    }
+                                }
+                                else
+                                {
+                                    minCost = (problem.costs[i][j][m][t] / problem.n[m]);
+                                    min_i = i;
+                                    min_m = m;
+                                    min_t = t;
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+
+                //            int sent = demand / problem.n[min_m];
+                //            if (sent == 0)
+                //                sent++;
+                //            if(sent > problem.usersCell[min_i][min_m][min_t]){
+                //                sent = problem.usersCell[min_i][min_m][min_t];
+                //            }
+
+                //assegno solo un utente per volta poi ricomincio a ciclare su j
+
+//                if(problem.usersCell[min_i][min_m][min_t] == 0)
+//                    continue; // non ci sono utenti, allarga la finestra w
+//
+
+
+
+
+//                // controllo se ho soddisfatto le richieste
+////                if (demand <= 0)
+////                    notSatisfied = false;
+//
+//                problem.activities[j] = demand;
+//
+//                break; // ho assegnato un utente, passo alla prossima j
+            }
+            solution[min_i][j][min_m][min_t]++;
+            problem.usersCell[min_i][min_m][min_t]--;
+            demand -= problem.n[min_m];
+            problem.activities[j] = demand;
+
+        }
+
+        bool again = false;
+        //controllo se ho risolto il problema
+        std::vector<int>::iterator it2 ;
+        for(it2=indexes.begin(); it2!= indexes.end();it2++){
+            if(problem.activities[*it2] > 0){
+                again = true;
+            }
+        }
+
+        if(!again) //tutte richieste soddisfatte
+            notSolved = false;
+
+
+    }//while
+
+    for (i = 0; i < nCells; i++)
+        for (j = 0; j < nCells; j++)
+            for (m = 0; m < nCustomerTypes; m++)
+                for (t = 0; t < nTimeSteps; t++)
+                    objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+
+    ////////////////////////////////////////////////////////////////////////////////////////////7
+    if (notSolved) {
+        cout << "Not feasible solution!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
+
+
+        for(int m=0;m<nCustomerTypes;m++)
+            for(int t=0;t<nTimeSteps;t++){
+                cout << "User type: " << m << ", time: " << t << endl;
+                for(int i=0; i<nCells; i++)
+                    cout << problem.usersCell[i][m][t] << " ";
+                cout << endl;
+            }
+
+
+
+    }else{
+        cout << "FEASIBLE!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
+    }
+
+    stat.push_back(objfun);
+    stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
+
+    hasSolution=true;
+
+
+    return (float) floor(objfun);
+}
+
+
 float Heuristic::solveTabu(vector<double> &stat, vector<int> indexes, Data problem)
 {
     tabu_list ts = tabu_list(rand()%20);
@@ -488,12 +994,14 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
         j = *it;
         notSatisfied = true;
         int demand = problem.activities[j];
+
+        again: ;
         // w -> dim|i-j|
         for (w=1; w<nCells && notSatisfied; w++)
         {
             if (j-w < 0 && j+w >= nCells)
             {
-                feasible = false;
+                //feasible = false;
                 break;
             }     // ----------------------------- not feasible
 
@@ -551,7 +1059,7 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                             min_t = t;
                         }
 
-                    }//if
+                    }
                 }
                 if(ds.isSolved()){
                     solution[i][j][0][min_t] = min_x;
@@ -564,7 +1072,7 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                         //for debug
 
                     }
-                    //problem.activities[j] = demand;
+                    problem.activities[j] = demand;
                 }
                 //check if demand has been satisfied
 
@@ -574,12 +1082,26 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
                 }
 
 
+
             }
 
 
 
 
+        }// for window
+
+        if (demand > 0 && demand < 200) {
+            demand++;
+            goto again;
         }
+
+        if (demand >= 200){
+            feasible = false;
+        }
+
+
+        //next j
+
     }
 
 
@@ -609,6 +1131,13 @@ float Heuristic::solveDio( vector<double>& stat, vector<int> indexes, Data probl
 
 
 
+    }else{
+        cout << "FEASIBLE!" << "\n\n";
+
+        cout << "Tasks to do: ";
+        for(int i=0; i<nCells; i++)
+            cout << problem.activities[i] << " ";
+        cout << "\n\n";
     }
     stat.push_back(objfun);
     stat.push_back((double)(clock() - tStart) / CLOCKS_PER_SEC);
