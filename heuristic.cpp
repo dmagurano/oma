@@ -655,7 +655,7 @@ float Heuristic::solveGreedy4( vector<double>& stat, vector<int> indexes, Data p
                             i = j - w;
                             if ( (problem.costs[i][j][m][t]/problem.n[m]) <= minCost && problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand ) {
                                 if (problem.costs[i][j][m][t] == minCost){
-                                    if ( ( ((double) (rand() % 101)) / 100 ) < 0.6) {
+                                    if ( ( ((double) (rand() % 101)) / 100 ) <= 1) {
                                         minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                         min_i = i;
                                         min_m = m;
@@ -676,7 +676,7 @@ float Heuristic::solveGreedy4( vector<double>& stat, vector<int> indexes, Data p
                             i = j + w;
                             if ( (problem.costs[i][j][m][t]/problem.n[m]) <= minCost && problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand ) {
                                 if (problem.costs[i][j][m][t] == minCost){
-                                    if ( ( ((double) (rand() % 101)) / 100 ) < 0.6) {
+                                    if ( ( ((double) (rand() % 101)) / 100 ) <= 1) {
                                         minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                         min_i = i;
                                         min_m = m;

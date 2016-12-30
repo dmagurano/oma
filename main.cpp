@@ -148,7 +148,8 @@ int main(int argc,char *argv[]){
 
         cout << "\n";
 
-      _heuristic.solveGreedy3(stat,order,problem);
+        //_heuristic.solveGreedy3(stat,order,problem);
+        _heuristic.solveGreedy4(stat,order,_heuristic.getProblem());
 
         // lavoriamo con il risultato della diofantina per partire in una tabu search
 
@@ -537,6 +538,14 @@ float Objective(GAGenome& g){
     bool notSolved = true;
     clock_t tStart = clock();
 
+    float p;
+    if(nCells > 100)
+        p=0.15;
+    else
+        p=0.5;
+
+
+
     while(notSolved && (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 )) {
 
         std::random_shuffle(indexes.begin(), indexes.end());
@@ -560,10 +569,10 @@ float Objective(GAGenome& g){
             int min_m = 0;
             int min_t = 0;
             for (w = 1; w < nCells; w++) {
-                if (j - w < 0 && j + w >= nCells) {
-                    //feasible = false;
-                    break;
-                }     // ----------------------------- not feasible
+//                if (j - w < 0 && j + w >= nCells) {
+//                    //feasible = false;
+//                    break;
+//                }     // ----------------------------- not feasible
 
 
 
@@ -588,7 +597,7 @@ float Objective(GAGenome& g){
                             if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
                                 problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
                                 if (problem.costs[i][j][m][t] == minCost) {
-                                    if ((((double) (rand() % 101)) / 100) < 1) {
+                                    if ((((double) (rand() % 101)) / 100) <= 1) {
                                         minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                         min_i = i;
                                         min_m = m;
@@ -608,7 +617,7 @@ float Objective(GAGenome& g){
                             if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
                                 problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
                                 if (problem.costs[i][j][m][t] == minCost) {
-                                    if ((((double) (rand() % 101)) / 100) < 1) {
+                                    if ((((double) (rand() % 101)) / 100) <= 1) {
                                         minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                         min_i = i;
                                         min_m = m;
@@ -639,7 +648,9 @@ float Objective(GAGenome& g){
                 if (problem.usersCell[min_i][min_m][min_t] == 0)
                     continue; // non ci sono utenti, allarga la finestra w
 
-                if (w >= 0.15 * nCells) {
+
+
+                if (w >= p * nCells) {
                     solution[min_i][j][min_m][min_t]++;
                     problem.usersCell[min_i][min_m][min_t]--;
                     demand -= problem.n[min_m];
