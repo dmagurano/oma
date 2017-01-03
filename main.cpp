@@ -9,6 +9,7 @@
 #include "heuristic.h"
 
 #include "ga/ga.h"
+#include "window.h"
 
 
 #define cout STD_COUT
@@ -33,6 +34,7 @@ int main(int argc,char *argv[]){
 	string _inPath;
 	string _outPath;
 	string _solPath;
+
 
 	// Read input parameters
 	for(int i=1; i< argc;i++) {
