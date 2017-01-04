@@ -17,7 +17,7 @@ for input_file in ./input/*.txt; do
 	
 	echo $heur_sol $opt_sol
 	
-	opt_gap=$(python -c "print round((float($heur_sol) - float(str($opt_sol).lstrip('\t')))/float($opt_sol) * 100.0,2)")
+	opt_gap=$(python -c "print str(round((float($heur_sol) - float(str($opt_sol).lstrip('\t')))/float($opt_sol) * 100.0,2)).replace('.', ',')")
 	
 	echo "Optimality gap: $opt_gap%"
 	
