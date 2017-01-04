@@ -9,7 +9,9 @@
 #include <ctime>
 #include <cstring>
 #include <chrono>
+#include <thread>
 #include <future>
+#include <stdlib.h>
 #include "utils.h"
 #include "heuristic.h"
 #define MAXTHREAD 8
@@ -31,6 +33,7 @@ int myrand(int i) {
 
 int ****bestSolution;
 double bestScore;
+void thread_function(Heuristic _heuristic);
 
 std::mutex sol_m;
 
@@ -94,7 +97,7 @@ int main(int argc,char *argv[]){
         clock_t start = clock();
         for (th=0; th<MAXTHREAD; th++)
         {
-            std::thread t = std::thread(thread_function, _heuristic, stats[th]);
+            std::thread t(thread_function, _heuristic, stats[th]);
             t.detach();
         }
         // check solution
