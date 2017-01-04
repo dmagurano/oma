@@ -123,7 +123,7 @@ float Heuristic::solveGreedy(vector<double>& stat, vector<int> indexes, Data pro
                     solution[i][j][m][t] = 0;
     auto a = chrono::high_resolution_clock::now().time_since_epoch();
     auto now_ms = std::chrono::duration_cast<std::chrono::microseconds>(a);
-    srand(hash3(now_ms.count(), getpid()));
+    srand(hash3(now_ms.count(), 1));
     int  objfun = 0;
     bool feasible = true;
     std::vector<int>::iterator it = indexes.begin();

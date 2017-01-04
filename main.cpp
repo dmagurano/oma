@@ -33,7 +33,7 @@ int myrand(int i) {
 
 int ****bestSolution;
 double bestScore;
-void thread_function(Heuristic _heuristic);
+void thread_function(Heuristic& _heuristic);
 
 std::mutex sol_m;
 
@@ -97,7 +97,7 @@ int main(int argc,char *argv[]){
         clock_t start = clock();
         for (th=0; th<MAXTHREAD; th++)
         {
-            std::thread t(thread_function, _heuristic, stats[th]);
+            std::thread t(thread_function, std::ref(_heuristic));
             t.detach();
         }
         // check solution
@@ -157,7 +157,7 @@ int main(int argc,char *argv[]){
 	return 0;
 }
 
-void thread_function(Heuristic _heuristic) {
+void thread_function(Heuristic& _heuristic) {
     int listLength = _heuristic.getCells();
     Data instance = _heuristic.getProblem();
     int *tasks = instance.activities;
@@ -189,7 +189,7 @@ void thread_function(Heuristic _heuristic) {
             if (tasks[i] > 0)
                 order.push_back(i);
         }
-        srand(hash3(time(0), chrono::high_resolution_clock::now().time_since_epoch().count(), getpid()));
+        srand(hash3(time(0), chrono::high_resolution_clock::now().time_since_epoch().count(), 1));
         random_shuffle(order.begin(), order.end(), myrand);
         // ###########################################################################################
         // ########### SOLVE ############

@@ -10,6 +10,7 @@
 #include <list>
 #include <map>
 #include <chrono>
+#include <cstring>
 
 using namespace std;
 

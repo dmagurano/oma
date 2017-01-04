@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/matti/ClionProjects/Material_assignment/heuristic.cpp
+/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.cpp
 iostream
 -
 random
@@ -16,9 +16,9 @@ algorithm
 ctime
 -
 heuristic.h
-C:/Users/matti/ClionProjects/Material_assignment/heuristic.h
+/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.h
 
-C:/Users/matti/ClionProjects/Material_assignment/heuristic.h
+/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.h
 string
 -
 sstream
@@ -37,8 +37,10 @@ map
 -
 chrono
 -
+cstring
+-
 
-C:/Users/matti/ClionProjects/Material_assignment/main.cpp
+/cygdrive/c/Users/matti/ClionProjects/Material_assignment/main.cpp
 list
 -
 iostream
@@ -59,12 +61,18 @@ cstring
 -
 chrono
 -
+thread
+-
+future
+-
+stdlib.h
+-
 utils.h
-C:/Users/matti/ClionProjects/Material_assignment/utils.h
+/cygdrive/c/Users/matti/ClionProjects/Material_assignment/utils.h
 heuristic.h
-C:/Users/matti/ClionProjects/Material_assignment/heuristic.h
+/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.h
 
-C:/Users/matti/ClionProjects/Material_assignment/utils.h
+/cygdrive/c/Users/matti/ClionProjects/Material_assignment/utils.h
 string
 -
 vector

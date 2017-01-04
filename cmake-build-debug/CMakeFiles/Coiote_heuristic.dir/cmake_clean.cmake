@@ -1,9 +1,8 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/Coiote_heuristic.dir/main.cpp.obj"
-  "CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.obj"
+  "CMakeFiles/Coiote_heuristic.dir/main.cpp.o"
+  "CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o"
   "Coiote_heuristic.pdb"
   "Coiote_heuristic.exe"
-  "Coiote_heuristic.exe.manifest"
   "libCoiote_heuristic.dll.a"
 )
 
