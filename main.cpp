@@ -9,10 +9,14 @@
 #include <ctime>
 #include <cstring>
 #include <chrono>
+#include <future>
 #include "utils.h"
 #include "heuristic.h"
-
+#define MAXTHREAD 8
+#define TH_TIME 4
+#define MAIN_TIME 4
 using namespace std;
+
 
 unsigned int hash3(unsigned int h1, unsigned int h2, unsigned int h3)
 {
@@ -24,6 +28,11 @@ int myrand(int i) {
     //srand(unsigned(time(0)));
     return rand()%i;
 }
+
+int ****bestSolution;
+double bestScore;
+
+std::mutex sol_m;
 
 int main(int argc,char *argv[]){
 	bool _test = false;
@@ -60,81 +69,154 @@ int main(int argc,char *argv[]){
         // Solve the problem
         //vector<double> stat;
         //_heuristic.solveFast(stat);
+        int nCells, nCustomerTypes, nTimeSteps;
+        nCells = _heuristic.getCells();
+        nCustomerTypes = _heuristic.getCustomers();
+        nTimeSteps = _heuristic.getTimeSteps();
+        // allocate BEST solution
 
+        bestSolution = new int***[nCells];
+        for (int i = 0; i < nCells; i++) {
+            bestSolution[i] = new int**[nCells];
+            for (int j = 0; j < nCells; j++) {
+                bestSolution[i][j] = new int*[nCustomerTypes];
+                for (int m = 0; m < nCustomerTypes; m++) {
+                    bestSolution[i][j][m] = new int[nTimeSteps];
+                }
+            }
+        }
 
-
-        //srand(unsigned(time(0)));
+        bestScore = 10000000;
         struct timeval;
-        //gettimeofday(&time, NULL);
+
+        vector<double> stats[MAXTHREAD];
+        int th;
         clock_t start = clock();
-        while ((double) ((clock() - start) / CLOCKS_PER_SEC) < 60.0) {
-            int listLength = _heuristic.getCells();
-            Data instance = _heuristic.getProblem();
-            int *tasks = instance.activities;
-            vector<int> order;
-            for (int i = 0; i < listLength; i++) {
-                if (tasks[i] > 0)
-                    order.push_back(i);
-            }
-
-            vector<double> stat;
-            srand(hash3(time(0), chrono::high_resolution_clock::now().time_since_epoch().count(), getpid()));
-            random_shuffle(order.begin(), order.end(), myrand);
-            //auto engine = default_random_engine{};
-            //std::shuffle(begin(order), end(order), engine);
-            _heuristic.solveGreedy(stat, order, instance);
-
-
-            /*
-             * vector<int> test;
-            test.push_back(17);
-            test.push_back(14);
-            test.push_back(27);
-            test.push_back(18);
-            test.push_back(10);
-            test.push_back(11);
-            test.push_back(13);
-            test.push_back(1);
-            test.push_back(29);
-            test.push_back(0);
-            test.push_back(28);
-            test.push_back(19);
-            test.push_back(4);
-            test.push_back(16);
-            test.push_back(9);
-
-            _heuristic.solveGreedy(stat,test,instance);
-            */
-
-            _heuristic.getStatSolution(stat);
-            // Write KPI of solution
-            string instanceName = splitpath(_inPath);
-            _heuristic.writeKPI(_outPath, instanceName, stat);
-            // Write solution
-            if (!_solPath.empty())
-                _heuristic.writeSolution(_solPath);
-
-           } //WHILE
-
+        for (th=0; th<MAXTHREAD; th++)
+        {
+            std::thread t = std::thread(thread_function, _heuristic, stats[th]);
+            t.detach();
         }
-        else {
-            // Read the instance file
-            Heuristic _heuristic(_inPath);
-            // Read the solution file
-            eFeasibleState _feasibility = _heuristic.isFeasible(_solPath);
-            switch (_feasibility) {
-                case FEASIBLE:
-                    cout << "Solution is feasible" << endl;
-                    break;
-                case NOT_FEASIBLE_DEMAND:
-                    cout << "Solution is not feasible: demand not satisfied" << endl;
-                    break;
-                case NOT_FEASIBLE_USERS:
-                    cout << "Solution is not feasible: exceeded number of available users" << endl;
-                    break;
+        // check solution
+        double stop = 0;
+        while (1)
+        {
+            stop =  (double)(clock() - start) / CLOCKS_PER_SEC;
+            if (stop > MAIN_TIME)
+                break;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        std::unique_lock<std::mutex> l(sol_m);
+
+        //
+/*
+        for (th=0; th<MAXTHREAD; th++)
+        {
+            if (results->wait_for(std::chrono::minutes(0)) == std::future_status::ready)
+            {
+                // thread end, evaluate its solution
+
             }
         }
+*/
+        vector<double> bestStat;
+        bestStat.push_back(stop);
+        bestStat.push_back(bestScore);
+        _heuristic.replaceSolution(bestSolution);
+        _heuristic.getStatSolution(bestStat);
+        // Write KPI of solution
+        string instanceName = splitpath(_inPath);
+        _heuristic.writeKPI(_outPath, instanceName, bestStat);
+        // Write solution
+        if (!_solPath.empty())
+            _heuristic.writeSolution(_solPath);
+
+
+    }
+    else {
+        // Read the instance file
+        Heuristic _heuristic(_inPath);
+        // Read the solution file
+        eFeasibleState _feasibility = _heuristic.isFeasible(_solPath);
+        switch (_feasibility) {
+            case FEASIBLE:
+                cout << "Solution is feasible" << endl;
+                break;
+            case NOT_FEASIBLE_DEMAND:
+                cout << "Solution is not feasible: demand not satisfied" << endl;
+                break;
+            case NOT_FEASIBLE_USERS:
+                cout << "Solution is not feasible: exceeded number of available users" << endl;
+                break;
+        }
+    }
 
 	return 0;
+}
+
+void thread_function(Heuristic _heuristic) {
+    int listLength = _heuristic.getCells();
+    Data instance = _heuristic.getProblem();
+    int *tasks = instance.activities;
+    int nCells, nCustomerTypes, nTimeSteps;
+    nCells = _heuristic.getCells();
+    nCustomerTypes = _heuristic.getCustomers();
+    nTimeSteps = _heuristic.getTimeSteps();
+    //vector<double> stat;
+    clock_t tStart = clock();
+    // allocate solution
+    int ****solution;
+    solution = new int***[nCells];
+    for (int i = 0; i < nCells; i++) {
+        solution[i] = new int**[nCells];
+        for (int j = 0; j < nCells; j++) {
+            solution[i][j] = new int*[nCustomerTypes];
+            for (int m = 0; m < nCustomerTypes; m++) {
+                solution[i][j][m] = new int[nTimeSteps];
+            }
+        }
+    }
+
+
+    while (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < TH_TIME)
+    {
+        //stat.clear();
+        vector<int> order;
+        for (int i = 0; i < listLength; i++) {
+            if (tasks[i] > 0)
+                order.push_back(i);
+        }
+        srand(hash3(time(0), chrono::high_resolution_clock::now().time_since_epoch().count(), getpid()));
+        random_shuffle(order.begin(), order.end(), myrand);
+        // ###########################################################################################
+        // ########### SOLVE ############
+        float objfun = _heuristic.solveWinner(order, solution);
+        // ##########################################################################################
+
+        //float objfun = 0;
+        /*
+        for (int i = 0; i < nCells; i++)
+            for (int j = 0; j < nCells; j++)
+                for (int m = 0; m < nCustomerTypes; m++)
+                    for (int t = 0; t < nTimeSteps; t++)
+                        objfun += solution[j][i][m][t] * instance.costs[j][i][m][t];
+        */
+        if (objfun < bestScore)
+        {
+            std::unique_lock<std::mutex> l(sol_m);
+            bestScore = objfun;
+            for (int i = 0; i < nCells; i++)
+                for (int j = 0; j < nCells; j++)
+                    for (int m = 0; m < nCustomerTypes; m++)
+                        for (int t = 0; t < nTimeSteps; t++)
+                            bestSolution[j][i][m][t] = solution[j][i][m][t];
+            /*bestStat.clear();
+            bestStat = stat;*/
+        }
+
+
+
+    }
+
 }
 

@@ -135,6 +135,14 @@ public:
         return nCells;
     };
 
+    int getCustomers() {
+        return nCustomerTypes;
+    }
+
+    int getTimeSteps() {
+        return nTimeSteps;
+    }
+
     Data getProblem(){
         Data p;
         p.costs = problem.costs;
@@ -158,6 +166,8 @@ public:
         return p;
     }
 
+    float solveWinner(vector<int>& indexes, int ****solution);
+    void replaceSolution(int ****newS);
 };
 
 #endif //COIOTE_HEURISTIC_HEURISTIC_H
