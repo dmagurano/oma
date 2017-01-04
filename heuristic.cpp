@@ -560,7 +560,7 @@ float Heuristic::solveGreedy3( vector<double>& stat, vector<int> indexes, Data p
             cout << problem.activities[i] << " ";
         cout << "\n\n";
 
-
+        //print users
         for(int m=0;m<nCustomerTypes;m++)
             for(int t=0;t<nTimeSteps;t++){
                 cout << "User type: " << m << ", time: " << t << endl;
@@ -578,6 +578,15 @@ float Heuristic::solveGreedy3( vector<double>& stat, vector<int> indexes, Data p
         for(int i=0; i<nCells; i++)
             cout << problem.activities[i] << " ";
         cout << "\n\n";
+
+        //print users
+        for(int m=0;m<nCustomerTypes;m++)
+            for(int t=0;t<nTimeSteps;t++){
+                cout << "User type: " << m << ", time: " << t << endl;
+                for(int i=0; i<nCells; i++)
+                    cout << problem.usersCell[i][m][t] << " ";
+                cout << endl;
+            }
     }
 
     stat.push_back(objfun);
@@ -672,6 +681,7 @@ float Heuristic::solveGreedy4( vector<double>& stat, vector<int> indexes, Data p
 
                             }
                         }
+
                         if (!(j + w >= nCells)) {
                             i = j + w;
                             if ( (problem.costs[i][j][m][t]/problem.n[m]) <= minCost && problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand ) {
