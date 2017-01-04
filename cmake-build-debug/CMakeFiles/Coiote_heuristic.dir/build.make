@@ -34,19 +34,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /cygdrive/c/Users/matti/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe
+CMAKE_COMMAND = /cygdrive/c/Users/Francesco/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe
 
 # The command to remove a file.
-RM = /cygdrive/c/Users/matti/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe -E remove -f
+RM = /cygdrive/c/Users/Francesco/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /cygdrive/c/Users/matti/ClionProjects/Material_assignment
+CMAKE_SOURCE_DIR = /cygdrive/c/Users/Francesco/ClionProjects/optma
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug
+CMAKE_BINARY_DIR = /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles/Coiote_heuristic.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/Coiote_heuristic.dir/flags.make
 
 CMakeFiles/Coiote_heuristic.dir/main.cpp.o: CMakeFiles/Coiote_heuristic.dir/flags.make
 CMakeFiles/Coiote_heuristic.dir/main.cpp.o: ../main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Coiote_heuristic.dir/main.cpp.o"
-	/usr/bin/c++.exe   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Coiote_heuristic.dir/main.cpp.o -c /cygdrive/c/Users/matti/ClionProjects/Material_assignment/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Coiote_heuristic.dir/main.cpp.o"
+	/usr/bin/c++.exe   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Coiote_heuristic.dir/main.cpp.o -c /cygdrive/c/Users/Francesco/ClionProjects/optma/main.cpp
 
 CMakeFiles/Coiote_heuristic.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Coiote_heuristic.dir/main.cpp.i"
-	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /cygdrive/c/Users/matti/ClionProjects/Material_assignment/main.cpp > CMakeFiles/Coiote_heuristic.dir/main.cpp.i
+	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /cygdrive/c/Users/Francesco/ClionProjects/optma/main.cpp > CMakeFiles/Coiote_heuristic.dir/main.cpp.i
 
 CMakeFiles/Coiote_heuristic.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Coiote_heuristic.dir/main.cpp.s"
-	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /cygdrive/c/Users/matti/ClionProjects/Material_assignment/main.cpp -o CMakeFiles/Coiote_heuristic.dir/main.cpp.s
+	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /cygdrive/c/Users/Francesco/ClionProjects/optma/main.cpp -o CMakeFiles/Coiote_heuristic.dir/main.cpp.s
 
 CMakeFiles/Coiote_heuristic.dir/main.cpp.o.requires:
 
@@ -83,16 +83,16 @@ CMakeFiles/Coiote_heuristic.dir/main.cpp.o.provides.build: CMakeFiles/Coiote_heu
 
 CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o: CMakeFiles/Coiote_heuristic.dir/flags.make
 CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o: ../heuristic.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o"
-	/usr/bin/c++.exe   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o -c /cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o"
+	/usr/bin/c++.exe   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o -c /cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.cpp
 
 CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.i"
-	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.cpp > CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.i
+	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.cpp > CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.i
 
 CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.s"
-	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.cpp -o CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.s
+	/usr/bin/c++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.cpp -o CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.s
 
 CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o.requires:
 
@@ -117,7 +117,7 @@ Coiote_heuristic.exe: CMakeFiles/Coiote_heuristic.dir/main.cpp.o
 Coiote_heuristic.exe: CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o
 Coiote_heuristic.exe: CMakeFiles/Coiote_heuristic.dir/build.make
 Coiote_heuristic.exe: CMakeFiles/Coiote_heuristic.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable Coiote_heuristic.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable Coiote_heuristic.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Coiote_heuristic.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -135,6 +135,6 @@ CMakeFiles/Coiote_heuristic.dir/clean:
 .PHONY : CMakeFiles/Coiote_heuristic.dir/clean
 
 CMakeFiles/Coiote_heuristic.dir/depend:
-	cd /cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /cygdrive/c/Users/matti/ClionProjects/Material_assignment /cygdrive/c/Users/matti/ClionProjects/Material_assignment /cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug /cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug /cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/CMakeFiles/Coiote_heuristic.dir/DependInfo.cmake --color=$(COLOR)
+	cd /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /cygdrive/c/Users/Francesco/ClionProjects/optma /cygdrive/c/Users/Francesco/ClionProjects/optma /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles/Coiote_heuristic.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/Coiote_heuristic.dir/depend
 

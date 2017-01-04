@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include "utils.h"
 #include "heuristic.h"
-#define MAXTHREAD 2 // num of threads
+#define MAXTHREAD 4 // num of threads
 #define TH_TIME 4.0 // threads loop limit
 #define MAIN_TIME 4.0 // main thread waiting (for solutions) time limit
 #define CHECK_RATE 1 // sleep interval main thread
@@ -100,6 +100,7 @@ int main(int argc,char *argv[]){
         {
             std::thread t(thread_function, std::ref(_heuristic));
             t.detach();
+
         }
         std::cout << "Threads launched! Checking time...." << std::endl;
         // check solution
@@ -159,7 +160,7 @@ int main(int argc,char *argv[]){
                 break;
         }
     }
-
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 	return 0;
 }
 
@@ -199,7 +200,7 @@ void thread_function(Heuristic& _heuristic) {
         // ###########################################################################################
         // ########### SOLVE ############
         float objfun = _heuristic.solveWinner(order, solution);
-        std::cout << "New score " << objfun << std::endl;
+        //std::cout << "New score " << objfun << std::endl;
         // ##########################################################################################
 
         //float objfun = 0;

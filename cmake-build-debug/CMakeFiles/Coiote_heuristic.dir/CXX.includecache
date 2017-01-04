@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.cpp
+/cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.cpp
 iostream
 -
 random
@@ -16,9 +16,9 @@ algorithm
 ctime
 -
 heuristic.h
-/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.h
+/cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.h
 
-/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.h
+/cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.h
 string
 -
 sstream
@@ -40,7 +40,7 @@ chrono
 cstring
 -
 
-/cygdrive/c/Users/matti/ClionProjects/Material_assignment/main.cpp
+/cygdrive/c/Users/Francesco/ClionProjects/optma/main.cpp
 list
 -
 iostream
@@ -68,11 +68,11 @@ future
 stdlib.h
 -
 utils.h
-/cygdrive/c/Users/matti/ClionProjects/Material_assignment/utils.h
+/cygdrive/c/Users/Francesco/ClionProjects/optma/utils.h
 heuristic.h
-/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.h
+/cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.h
 
-/cygdrive/c/Users/matti/ClionProjects/Material_assignment/utils.h
+/cygdrive/c/Users/Francesco/ClionProjects/optma/utils.h
 string
 -
 vector

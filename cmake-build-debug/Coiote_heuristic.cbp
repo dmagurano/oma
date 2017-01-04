@@ -8,43 +8,44 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug"/>
+				<Option working_dir="/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug"/>
+				<Option working_dir="/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug"/>
+				<Option working_dir="/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="Coiote_heuristic">
-				<Option output="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Coiote_heuristic.exe" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug"/>
+				<Option output="/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Coiote_heuristic.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include"/>
+					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/include"/>
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/../../../../lib/../include/w32api"/>
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++"/>
@@ -52,20 +53,21 @@
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++/backward"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 Coiote_heuristic"/>
-					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 Coiote_heuristic"/>
+					<CompileFile command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="Coiote_heuristic/fast">
-				<Option output="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Coiote_heuristic.exe" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug"/>
+				<Option output="/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Coiote_heuristic.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include"/>
+					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/include"/>
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/../../../../lib/../include/w32api"/>
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++"/>
@@ -73,26 +75,26 @@
 					<Add directory="/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++/backward"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 Coiote_heuristic/fast"/>
-					<CompileFile command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make.exe -j4 -f &quot;/cygdrive/c/Users/matti/ClionProjects/Material_assignment/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 Coiote_heuristic/fast"/>
+					<CompileFile command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make.exe -j6 -f &quot;/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.cpp">
+		<Unit filename="/cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.cpp">
 			<Option target="Coiote_heuristic"/>
 		</Unit>
-		<Unit filename="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/heuristic.h">
+		<Unit filename="/cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.h">
 			<Option target="Coiote_heuristic"/>
 		</Unit>
-		<Unit filename="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/main.cpp">
+		<Unit filename="/cygdrive/c/Users/Francesco/ClionProjects/optma/main.cpp">
 			<Option target="Coiote_heuristic"/>
 		</Unit>
-		<Unit filename="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/utils.h">
+		<Unit filename="/cygdrive/c/Users/Francesco/ClionProjects/optma/utils.h">
 			<Option target="Coiote_heuristic"/>
 		</Unit>
-		<Unit filename="/cygdrive/c/Users/matti/ClionProjects/Material_assignment/CMakeLists.txt">
+		<Unit filename="/cygdrive/c/Users/Francesco/ClionProjects/optma/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>
