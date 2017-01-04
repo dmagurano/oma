@@ -144,6 +144,10 @@ public:
         return nTimeSteps;
     }
 
+    int**** getSolution();
+
+    int**** getSolutionContainer();
+
     void setHasSolution(bool b);
 
     Data getProblem(){

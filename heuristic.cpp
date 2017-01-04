@@ -331,6 +331,31 @@ void Heuristic::writeSolution(string path) {
     fileO.close();
 }
 
+int**** Heuristic::getSolution()
+{
+    return solution;
+}
+
+int**** Heuristic::getSolutionContainer()
+{
+    int ****sol;
+    sol = new int***[nCells];
+    for (int i = 0; i < nCells; i++) {
+        sol[i] = new int**[nCells];
+        for (int j = 0; j < nCells; j++) {
+            sol[i][j] = new int*[nCustomerTypes];
+            for (int m = 0; m < nCustomerTypes; m++) {
+                sol[i][j][m] = new int[nTimeSteps];
+                for (int t = 0; t < nTimeSteps; t++) {
+                    solution[i][j][m][t] = 0;
+                }
+            }
+        }
+    }
+
+    return sol;
+}
+
 eFeasibleState Heuristic::isFeasible(string path) {
 
     string line;
@@ -443,13 +468,14 @@ void Heuristic::replaceSolution(int ****newS) {
     for (int i = 0; i < nCells; i++)
         for (int j = 0; j < nCells; j++)
             for (int m = 0; m < nCustomerTypes; m++)
-                for (int t = 0; t < nTimeSteps; t++)
-                    this->solution[j][i][m][t] = newS[j][i][m][t];
+                for (int t = 0; t < nTimeSteps; t++) {
+                        this->solution[j][i][m][t] = newS[j][i][m][t];
+                }
 }
+
 
 float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
 {
-
     int i, j, m, t, w;
     bool notSatisfied;
     for (i = 0; i < nCells; i++)
@@ -466,15 +492,20 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
 
     float p;
     if(nCells > 100)
-        p=0.15;
+        p = 0.25;
     else
-        p=0.25;
+        p=0.5;
+
+    vector<int> customers;
+    for (int cust = 0; cust < nCustomerTypes; cust++)
+        customers.push_back(cust);
 
     while(notSolved && (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < 5.0 )) {
 
         //std::random_shuffle(indexes.begin(), indexes.end());
         std::vector<int>::iterator it = indexes.begin();
         std::vector<int>::iterator end = indexes.end();
+
 //        std::vector<int>::iterator it3 ;
 //        for(it3=indexes.begin(); it3!= indexes.end();it3++){
 //            cout << " " << *it3;
@@ -492,20 +523,12 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
                 int min_i = 0;
                 int min_m = 0;
                 int min_t = 0;
-                for (w = 1; w < nCells; w++) {
+                for (w = 1; w < nCells; w++)
+                {
 //                if (j - w < 0 && j + w >= nCells) {
 //                    //feasible = false;
 //                    break;
 //                }     // ----------------------------- not feasible
-
-
-
-                    //vedo qual'è il costo minore nella finestra w
-                    vector<int> customers;
-                    for (int cust = 0; cust < nCustomerTypes; cust++)
-                        customers.push_back(cust);
-
-
                     random_shuffle(customers.begin(), customers.end());
 //                for (m=0; m < nCustomerTypes; m++){
                     for (vector<int>::iterator cIt = customers.begin(); cIt != customers.end(); cIt++) {
@@ -515,9 +538,11 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
                         //                if (demand < problem.n[m])
                         //                    continue;
 
-                        for (t = 0; t < nTimeSteps; t++) {
+                        for (t = 0; t < nTimeSteps; t++)
+                        {
 
-                            if (!(j - w < 0)) {
+                            if (!(j - w < 0))
+                            {
                                 i = j - w;
                                 if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
                                     problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
@@ -537,7 +562,8 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
 
                                 }
                             }
-                            if (!(j + w >= nCells)) {
+                            if (!(j + w >= nCells))
+                            {
                                 i = j + w;
                                 if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
                                     problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
@@ -620,8 +646,9 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
     for (i = 0; i < nCells; i++)
         for (j = 0; j < nCells; j++)
             for (m = 0; m < nCustomerTypes; m++)
-                for (t = 0; t < nTimeSteps; t++)
+                for (t = 0; t < nTimeSteps; t++) {
                     objfun += solution[j][i][m][t] * problem.costs[j][i][m][t];
+                }
 
     ////////////////////////////////////////////////////////////////////////////////////////////7
     if (notSolved){

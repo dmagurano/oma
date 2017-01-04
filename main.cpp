@@ -16,7 +16,7 @@
 #include "heuristic.h"
 #define MAXTHREAD 4 // num of threads
 #define TH_TIME 4.0 // threads loop limit
-#define MAIN_TIME 4.0 // main thread waiting (for solutions) time limit
+#define MAIN_TIME 900 // main thread waiting (for solutions) time limit
 #define CHECK_RATE 1 // sleep interval main thread
 using namespace std;
 
@@ -80,18 +80,27 @@ int main(int argc,char *argv[]){
         // allocate BEST solution
 
         bestSolution = new int***[nCells];
+        int**** solution = new int***[nCells];
         for (int i = 0; i < nCells; i++) {
             bestSolution[i] = new int**[nCells];
+            solution[i] = new int**[nCells];
             for (int j = 0; j < nCells; j++) {
                 bestSolution[i][j] = new int*[nCustomerTypes];
+                solution[i][j] = new int*[nCustomerTypes];
                 for (int m = 0; m < nCustomerTypes; m++) {
                     bestSolution[i][j][m] = new int[nTimeSteps];
+                    solution[i][j][m] = new int[nTimeSteps];
+                    for (int t = 0; t < nTimeSteps; t++) {
+                        bestSolution[i][j][m][t] = 0;
+                        solution[i][j][m][t] = 0;
+                    }
                 }
             }
         }
 
         bestScore = 10000000;
-        struct timeval;
+
+        /*struct timeval;
 
         vector<double> stats[MAXTHREAD];
         int th;
@@ -100,7 +109,6 @@ int main(int argc,char *argv[]){
         {
             std::thread t(thread_function, std::ref(_heuristic));
             t.detach();
-
         }
         std::cout << "Threads launched! Checking time...." << std::endl;
         // check solution
@@ -125,8 +133,38 @@ int main(int argc,char *argv[]){
             }
         }
 */
-        std::cout << "Processing completed." << std::endl << "Best score: " << bestScore << std::endl;
+        //std::cout << "Processing completed." << std::endl << "Best score: " << bestScore << std::endl;
+        srand(time(NULL));
         vector<double> bestStat;
+        float objfun;
+
+        //build indexes array
+        vector<int> indexes = vector<int>();
+        for (int i = 0; i < nCells; i++)
+        {
+            if (_heuristic.getProblem().activities[i] > 0)
+            {
+                indexes.push_back(i);
+            }
+        }
+        clock_t stop;
+        clock_t start = clock();
+        while (1)
+        {
+            stop =  (double)(clock() - start) / CLOCKS_PER_SEC;
+            if (stop > MAIN_TIME)
+                break;
+            random_shuffle(indexes.begin(), indexes.end());
+            objfun = _heuristic.solveWinner(indexes, solution);
+
+            if (objfun < bestScore)
+            {
+                bestScore = objfun;
+                bestSolution = solution;
+            }
+        }
+
+
         bestStat.push_back(bestScore);
         bestStat.push_back(stop);
         _heuristic.replaceSolution(bestSolution);
