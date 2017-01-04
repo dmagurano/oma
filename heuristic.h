@@ -144,6 +144,8 @@ public:
         return nTimeSteps;
     }
 
+    void setHasSolution(bool b);
+
     Data getProblem(){
         Data p;
         p.costs = problem.costs;

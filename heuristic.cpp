@@ -292,10 +292,13 @@ void Heuristic::solveFast(vector<double>& stat, int timeLimit) {
     hasSolution=true;
 }
 
+void Heuristic::setHasSolution(bool b) {
+    hasSolution=b;
+}
+
 void Heuristic::writeKPI(string path, string instanceName, vector<double> stat){
     if (!hasSolution)
         return;
-
     ofstream fileO(path, ios::app);
     if(!fileO.is_open())
         return;

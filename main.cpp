@@ -14,9 +14,10 @@
 #include <stdlib.h>
 #include "utils.h"
 #include "heuristic.h"
-#define MAXTHREAD 8
-#define TH_TIME 4
-#define MAIN_TIME 4
+#define MAXTHREAD 2 // num of threads
+#define TH_TIME 4.0 // threads loop limit
+#define MAIN_TIME 4.0 // main thread waiting (for solutions) time limit
+#define CHECK_RATE 1 // sleep interval main thread
 using namespace std;
 
 
@@ -100,6 +101,7 @@ int main(int argc,char *argv[]){
             std::thread t(thread_function, std::ref(_heuristic));
             t.detach();
         }
+        std::cout << "Threads launched! Checking time...." << std::endl;
         // check solution
         double stop = 0;
         while (1)
@@ -107,10 +109,10 @@ int main(int argc,char *argv[]){
             stop =  (double)(clock() - start) / CLOCKS_PER_SEC;
             if (stop > MAIN_TIME)
                 break;
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(CHECK_RATE));
         }
         std::unique_lock<std::mutex> l(sol_m);
-
+        std::cout << "Main thread: get the final score." << std::endl;
         //
 /*
         for (th=0; th<MAXTHREAD; th++)
@@ -122,18 +124,22 @@ int main(int argc,char *argv[]){
             }
         }
 */
+        std::cout << "Processing completed." << std::endl << "Best score: " << bestScore << std::endl;
         vector<double> bestStat;
-        bestStat.push_back(stop);
         bestStat.push_back(bestScore);
+        bestStat.push_back(stop);
         _heuristic.replaceSolution(bestSolution);
-        _heuristic.getStatSolution(bestStat);
+        if (bestScore < 10000000)
+            _heuristic.setHasSolution(true);
+        //_heuristic.getStatSolution(bestStat);
         // Write KPI of solution
+        std::cout << "Printing the solution." << std::endl;
         string instanceName = splitpath(_inPath);
         _heuristic.writeKPI(_outPath, instanceName, bestStat);
         // Write solution
         if (!_solPath.empty())
             _heuristic.writeSolution(_solPath);
-
+        std::cout << "End." << std::endl;
 
     }
     else {
@@ -158,6 +164,7 @@ int main(int argc,char *argv[]){
 }
 
 void thread_function(Heuristic& _heuristic) {
+    std::cout << "New thread started." << std::endl;
     int listLength = _heuristic.getCells();
     Data instance = _heuristic.getProblem();
     int *tasks = instance.activities;
@@ -179,8 +186,6 @@ void thread_function(Heuristic& _heuristic) {
             }
         }
     }
-
-
     while (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < TH_TIME)
     {
         //stat.clear();
@@ -194,6 +199,7 @@ void thread_function(Heuristic& _heuristic) {
         // ###########################################################################################
         // ########### SOLVE ############
         float objfun = _heuristic.solveWinner(order, solution);
+        std::cout << "New score " << objfun << std::endl;
         // ##########################################################################################
 
         //float objfun = 0;
