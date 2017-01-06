@@ -123,6 +123,19 @@ Coiote_heuristic/fast:
 	$(MAKE) -f CMakeFiles/Coiote_heuristic.dir/build.make CMakeFiles/Coiote_heuristic.dir/build
 .PHONY : Coiote_heuristic/fast
 
+#=============================================================================
+# Target rules for targets named Coiote
+
+# Build rule for target.
+Coiote: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Coiote
+.PHONY : Coiote
+
+# fast build rule for target.
+Coiote/fast:
+	$(MAKE) -f CMakeFiles/Coiote.dir/build.make CMakeFiles/Coiote.dir/build
+.PHONY : Coiote/fast
+
 heuristic.o: heuristic.cpp.o
 
 .PHONY : heuristic.o
@@ -186,6 +199,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... Coiote_heuristic"
+	@echo "... Coiote"
 	@echo "... heuristic.o"
 	@echo "... heuristic.i"
 	@echo "... heuristic.s"

@@ -1,23 +1,20 @@
 #include <list>
 #include <iostream>
 
-#include <list>
 #include <random>
-#include <iostream>
 #include <algorithm>
-#include <cstdlib>
 #include <ctime>
 #include <cstring>
 #include <chrono>
 #include <thread>
 #include <future>
-#include <stdlib.h>
+
 #include "utils.h"
 #include "heuristic.h"
-#define MAXTHREAD 4 // num of threads
+#define MAXTHREAD 8 // num of threads
 #define TH_TIME 4.0 // threads loop limit
-#define MAIN_TIME 4.0 // main thread waiting (for solutions) time limit
-#define CHECK_RATE 1 // sleep interval main thread
+#define MAIN_TIME 4 // main thread waiting (for solutions) time limit
+//#define CHECK_RATE 1 // sleep interval main thread
 using namespace std;
 
 
@@ -32,11 +29,22 @@ int myrand(int i) {
     return rand()%i;
 }
 
+struct thread_result
+{
+    std::thread *t;
+    float obj_fun;
+    float reduction_factor;
+    vector<int> order;
+    int**** solution;
+    bool valid;
+};
+
 int ****bestSolution;
 double bestScore;
-void thread_function(Heuristic& _heuristic);
+void thread_function(Heuristic& _heuristic, thread_result* tr);
 
-std::mutex sol_m;
+
+//std::mutex sol_m;
 
 int main(int argc,char *argv[]){
 	bool _test = false;
@@ -89,22 +97,46 @@ int main(int argc,char *argv[]){
                 }
             }
         }
-
+        srand(time(NULL));
         bestScore = 10000000;
         struct timeval;
 
-        vector<double> stats[MAXTHREAD];
+        //vector<double> stats[MAXTHREAD];
+        thread_result *trs = new thread_result[MAXTHREAD];
         int th;
+
         clock_t start = clock();
         for (th=0; th<MAXTHREAD; th++)
         {
-            std::thread t(thread_function, std::ref(_heuristic));
-            t.detach();
+            if (nCells > 100) {
+                if (th == 0)
+                    trs[th].reduction_factor = 0.5;
+                else if (th == 1)
+                    trs[th].reduction_factor = 0.15;
+                else
+                    trs[th].reduction_factor = (float) ((rand() % 80 - 15) + 15) / 100;
+            }
+            else
+            {
+                if (th == 0)
+                    trs[th].reduction_factor = 1;
+                else if (th == 1)
+                    trs[th].reduction_factor = 0.25;
+                else
+                    trs[th].reduction_factor = (float) ((rand() % 101 - 25) + 25) / 100;
+            }
+            trs[th].obj_fun = 10000000;
+            trs[th].t = new std::thread(thread_function, std::ref(_heuristic), &trs[th]);
+
+            trs[th].t->detach();
 
         }
-        std::cout << "Threads launched! Checking time...." << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::seconds(MAIN_TIME));
+        //std::cout << "Threads launched! Checking time...." << std::endl;
         // check solution
-        double stop = 0;
+        /*double stop = 0;
+
         while (1)
         {
             stop =  (double)(clock() - start) / CLOCKS_PER_SEC;
@@ -112,8 +144,22 @@ int main(int argc,char *argv[]){
                 break;
             std::this_thread::sleep_for(std::chrono::seconds(CHECK_RATE));
         }
-        std::unique_lock<std::mutex> l(sol_m);
-        std::cout << "Main thread: get the final score." << std::endl;
+        //std::unique_lock<std::mutex> l(sol_m);
+        //std::cout << "Main thread: get the final score." << std::endl;*/
+
+        thread_result *mintr = &trs[0];
+        double stop = (double) (clock() - start) / CLOCKS_PER_SEC;
+
+
+        for (th = 1; th < MAXTHREAD; th++)
+        {
+            if (trs[th].valid && mintr->obj_fun > trs[th].obj_fun)
+            {
+                mintr = &trs[th];
+            }
+        }
+
+
         //
 /*
         for (th=0; th<MAXTHREAD; th++)
@@ -124,12 +170,18 @@ int main(int argc,char *argv[]){
 
             }
         }
+
 */
-        std::cout << "Processing completed." << std::endl << "Best score: " << bestScore << std::endl;
+        if (mintr->valid)
+        {
+            _heuristic.replaceSolution(mintr->solution);
+            bestScore = mintr->obj_fun;
+        }
+        std::cout << "Processing completed." << std::endl << "Best score: " << mintr->obj_fun << std::endl;
         vector<double> bestStat;
         bestStat.push_back(bestScore);
         bestStat.push_back(stop);
-        _heuristic.replaceSolution(bestSolution);
+
         if (bestScore < 10000000)
             _heuristic.setHasSolution(true);
         //_heuristic.getStatSolution(bestStat);
@@ -160,12 +212,12 @@ int main(int argc,char *argv[]){
                 break;
         }
     }
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    //std::this_thread::sleep_for(std::chrono::seconds(2));
 	return 0;
 }
 
-void thread_function(Heuristic& _heuristic) {
-    std::cout << "New thread started." << std::endl;
+void thread_function(Heuristic& _heuristic, thread_result* tr) {
+    //std::cout << "New thread started." << std::endl;
     int listLength = _heuristic.getCells();
     Data instance = _heuristic.getProblem();
     int *tasks = instance.activities;
@@ -173,33 +225,50 @@ void thread_function(Heuristic& _heuristic) {
     nCells = _heuristic.getCells();
     nCustomerTypes = _heuristic.getCustomers();
     nTimeSteps = _heuristic.getTimeSteps();
+    int seed;
+
     //vector<double> stat;
     clock_t tStart = clock();
     // allocate solution
     int ****solution;
     solution = new int***[nCells];
-    for (int i = 0; i < nCells; i++) {
+    tr->solution = new int***[nCells];
+    for (int i = 0; i < nCells; i++)
+    {
         solution[i] = new int**[nCells];
-        for (int j = 0; j < nCells; j++) {
+        tr->solution[i] = new int**[nCells];
+        for (int j = 0; j < nCells; j++)
+        {
             solution[i][j] = new int*[nCustomerTypes];
-            for (int m = 0; m < nCustomerTypes; m++) {
+            tr->solution[i][j] = new int*[nCustomerTypes];
+            for (int m = 0; m < nCustomerTypes; m++)
+            {
                 solution[i][j][m] = new int[nTimeSteps];
+                tr->solution[i][j][m] = new int[nTimeSteps];
+
             }
         }
     }
+
+    vector<int> order;
+    for (int i = 0; i < listLength; i++) {
+        if (tasks[i] > 0)
+            order.push_back(i);
+    }
+
+    float objfun;
     while (((double)(clock() - tStart) / CLOCKS_PER_SEC ) < TH_TIME)
     {
+
         //stat.clear();
-        vector<int> order;
-        for (int i = 0; i < listLength; i++) {
-            if (tasks[i] > 0)
-                order.push_back(i);
-        }
-        srand(hash3(time(0), chrono::high_resolution_clock::now().time_since_epoch().count(), 1));
+        seed = hash3(time(0), chrono::high_resolution_clock::now().time_since_epoch().count(), 1);
+        srand(seed);
         random_shuffle(order.begin(), order.end(), myrand);
         // ###########################################################################################
         // ########### SOLVE ############
-        float objfun = _heuristic.solveWinner(order, solution);
+        tr->valid = false;
+        objfun = _heuristic.solveWinner(order, solution, tr->reduction_factor);
+        tr->valid = true;
         //std::cout << "New score " << objfun << std::endl;
         // ##########################################################################################
 
@@ -211,15 +280,24 @@ void thread_function(Heuristic& _heuristic) {
                     for (int t = 0; t < nTimeSteps; t++)
                         objfun += solution[j][i][m][t] * instance.costs[j][i][m][t];
         */
-        if (objfun < bestScore)
+        if (objfun < tr->obj_fun)
         {
-            std::unique_lock<std::mutex> l(sol_m);
+            tr->obj_fun = objfun;
+            tr->order = order;
+            tr->valid = false;
+            for (int i = 0; i < nCells; i++)
+                for (int j = 0; j < nCells; j++)
+                    for (int m = 0; m < nCustomerTypes; m++)
+                        for (int t = 0; t < nTimeSteps; t++)
+                            tr->solution[j][i][m][t] = solution[j][i][m][t];
+            tr->valid = true;
+            /*std::unique_lock<std::mutex> l(sol_m);
             bestScore = objfun;
             for (int i = 0; i < nCells; i++)
                 for (int j = 0; j < nCells; j++)
                     for (int m = 0; m < nCustomerTypes; m++)
                         for (int t = 0; t < nTimeSteps; t++)
-                            bestSolution[j][i][m][t] = solution[j][i][m][t];
+                            bestSolution[j][i][m][t] = solution[j][i][m][t];*/
             /*bestStat.clear();
             bestStat = stat;*/
         }
@@ -227,6 +305,6 @@ void thread_function(Heuristic& _heuristic) {
 
 
     }
-
+    tr->valid = true;
 }
 

@@ -1,3 +1,4 @@
 /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles/rebuild_cache.dir
 /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles/edit_cache.dir
 /cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles/Coiote_heuristic.dir
+/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles/Coiote.dir

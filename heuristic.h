@@ -144,6 +144,11 @@ public:
         return nTimeSteps;
     }
 
+    int**** getSolution()
+    {
+        return solution;
+    }
+
     void setHasSolution(bool b);
 
     Data getProblem(){
@@ -169,7 +174,7 @@ public:
         return p;
     }
 
-    float solveWinner(vector<int>& indexes, int ****solution);
+    float solveWinner(vector<int>& indexes, int ****solution, float window_reduction_factor);
     void replaceSolution(int ****newS);
 };
 
