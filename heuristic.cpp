@@ -420,7 +420,7 @@ eFeasibleState Heuristic::isFeasible(string path) {
     return FEASIBLE;
 }
 
-/*void Heuristic::getStatSolution(vector<double>& stat) {
+void Heuristic::getStatSolution(vector<double>& stat) {
     if (!hasSolution)
         return;
 
@@ -438,7 +438,7 @@ eFeasibleState Heuristic::isFeasible(string path) {
         stat.push_back(tipi[m]);
 
 }
-*/
+
 void Heuristic::replaceSolution(int ****newS) {
     for (int i = 0; i < nCells; i++)
         for (int j = 0; j < nCells; j++)
@@ -447,7 +447,7 @@ void Heuristic::replaceSolution(int ****newS) {
                     this->solution[j][i][m][t] = newS[j][i][m][t];
 }
 
-float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float window_reduction_factor)
+float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float window_reduction_factor, clock_t start, float maxtime, bool *valid)
 {
 
     int i, j, m, t, w;
@@ -462,7 +462,7 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float windo
     Data problem = getProblem();
 
     bool notSolved = true;
-    clock_t tStart = clock();
+    clock_t tStart = start;
 
     float p = window_reduction_factor;
     if (p < 0) {
@@ -492,7 +492,14 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float windo
             j = *it;
             //notSatisfied = true;
             int demand = problem.activities[j];
-            while (demand > 0){
+            while (demand > 0)
+            {
+                if (((double)(clock() - start) / CLOCKS_PER_SEC) >= maxtime)
+                {
+                    *valid = false;
+                    return 10000000;
+                }
+
 
                 // w -> dim|i-j|
                 int minCost = 100000;
@@ -516,7 +523,6 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float windo
 
                         for (t = 0; t < nTimeSteps; t++)
                         {
-
                             if (j - w >= 0)
                             {
                                 i = j - w;
@@ -633,7 +639,7 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float windo
 
 
 
-
+    *valid = true;
     return (float) floor(objfun);
 
 

@@ -25,7 +25,7 @@ for input_file in ./$source_dir/*.txt; do
 	echo $(./Coiote -i $input_file -s ./output/$filename.csv -test)
 
 	
-	heur_sol=$(tail -1 ./output/summary.csv | cut -f2 -d';')
+	heur_sol=$(tail -1 ./output/summary.csv | cut -f3 -d';')
 	
 	opt_sol=$(cat $opt_file | grep -w $(echo $filename | cut -f1 -d.) | cut -f3 -d';' | cut -c2-)
 	

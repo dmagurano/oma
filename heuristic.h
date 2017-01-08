@@ -174,7 +174,7 @@ public:
         return p;
     }
 
-    float solveWinner(vector<int>& indexes, int ****solution, float window_reduction_factor);
+    float solveWinner(vector<int>& indexes, int ****solution, float window_reduction_factor, clock_t start, float maxtime, bool *valid);
     void replaceSolution(int ****newS);
 };
 

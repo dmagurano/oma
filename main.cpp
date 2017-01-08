@@ -11,9 +11,9 @@
 
 #include "utils.h"
 #include "heuristic.h"
-#define MAXTHREAD 8 // num of threads
-#define TH_TIME 4.0 // threads loop limit
-#define MAIN_TIME 4 // main thread waiting (for solutions) time limit
+#define MAXTHREAD 4 // num of threads
+#define TH_TIME 4.65 // threads loop limit
+#define MAIN_TIME 4.75 // main thread waiting (for solutions) time limit
 //#define CHECK_RATE 1 // sleep interval main thread
 using namespace std;
 
@@ -132,7 +132,7 @@ int main(int argc,char *argv[]){
 
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(MAIN_TIME));
+        std::this_thread::sleep_for(std::chrono::duration<double>(MAIN_TIME));
         //std::cout << "Threads launched! Checking time...." << std::endl;
         // check solution
         /*double stop = 0;
@@ -179,11 +179,13 @@ int main(int argc,char *argv[]){
         }
         std::cout << "Processing completed." << std::endl << "Best score: " << mintr->obj_fun << std::endl;
         vector<double> bestStat;
-        bestStat.push_back(bestScore);
         bestStat.push_back(stop);
+        bestStat.push_back(bestScore);
 
         if (bestScore < 10000000)
             _heuristic.setHasSolution(true);
+
+        _heuristic.getStatSolution(bestStat);
         //_heuristic.getStatSolution(bestStat);
         // Write KPI of solution
         std::cout << "Printing the solution." << std::endl;
@@ -266,9 +268,8 @@ void thread_function(Heuristic& _heuristic, thread_result* tr) {
         random_shuffle(order.begin(), order.end(), myrand);
         // ###########################################################################################
         // ########### SOLVE ############
-        tr->valid = false;
-        objfun = _heuristic.solveWinner(order, solution, tr->reduction_factor);
         tr->valid = true;
+        objfun = _heuristic.solveWinner(order, solution, tr->reduction_factor, tStart, TH_TIME, &tr->valid);
         //std::cout << "New score " << objfun << std::endl;
         // ##########################################################################################
 
@@ -280,17 +281,15 @@ void thread_function(Heuristic& _heuristic, thread_result* tr) {
                     for (int t = 0; t < nTimeSteps; t++)
                         objfun += solution[j][i][m][t] * instance.costs[j][i][m][t];
         */
-        if (objfun < tr->obj_fun)
+        if (objfun < tr->obj_fun && tr->valid)
         {
             tr->obj_fun = objfun;
             tr->order = order;
-            tr->valid = false;
             for (int i = 0; i < nCells; i++)
                 for (int j = 0; j < nCells; j++)
                     for (int m = 0; m < nCustomerTypes; m++)
                         for (int t = 0; t < nTimeSteps; t++)
                             tr->solution[j][i][m][t] = solution[j][i][m][t];
-            tr->valid = true;
             /*std::unique_lock<std::mutex> l(sol_m);
             bestScore = objfun;
             for (int i = 0; i < nCells; i++)
@@ -302,9 +301,11 @@ void thread_function(Heuristic& _heuristic, thread_result* tr) {
             bestStat = stat;*/
         }
 
-
+        if (tr->obj_fun < 10000000)
+        {
+            tr->valid = true;
+        }
 
     }
-    tr->valid = true;
 }
 

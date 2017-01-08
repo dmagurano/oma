@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/cygdrive/c/Users/Francesco/ClionProjects/optma/heuristic.cpp" "/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o"
-  "/cygdrive/c/Users/Francesco/ClionProjects/optma/main.cpp" "/cygdrive/c/Users/Francesco/ClionProjects/optma/cmake-build-debug/CMakeFiles/Coiote_heuristic.dir/main.cpp.o"
+  "/cygdrive/c/Users/Franc/CLionProjects/oma/heuristic.cpp" "/cygdrive/c/Users/Franc/CLionProjects/oma/cmake-build-debug/CMakeFiles/Coiote_heuristic.dir/heuristic.cpp.o"
+  "/cygdrive/c/Users/Franc/CLionProjects/oma/main.cpp" "/cygdrive/c/Users/Franc/CLionProjects/oma/cmake-build-debug/CMakeFiles/Coiote_heuristic.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
