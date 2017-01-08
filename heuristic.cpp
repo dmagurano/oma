@@ -528,19 +528,19 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float windo
                                 i = j - w;
                                 if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
                                     problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
-                                    if ((problem.costs[i][j][m][t] / problem.n[m]) == minCost) {
+                                    /*if ((problem.costs[i][j][m][t] / problem.n[m]) == minCost) {
                                         if ((((double) (rand() % 101)) / 100) <= 1) {
                                             minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                             min_i = i;
                                             min_m = m;
                                             min_t = t;
                                         }
-                                    } else {
+                                    } else {*/
                                         minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                         min_i = i;
                                         min_m = m;
                                         min_t = t;
-                                    }
+                                    //}
 
                                 }
                             }
@@ -549,19 +549,19 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution, float windo
                                 i = j + w;
                                 if ((problem.costs[i][j][m][t] / problem.n[m]) <= minCost &&
                                     problem.usersCell[i][m][t] > 0 && problem.n[m] <= demand) {
-                                    if ((problem.costs[i][j][m][t] / problem.n[m]) == minCost) {
+                                    /*if ((problem.costs[i][j][m][t] / problem.n[m]) == minCost) {
                                         if ((((double) (rand() % 101)) / 100) <= 1) {
                                             minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                             min_i = i;
                                             min_m = m;
                                             min_t = t;
                                         }
-                                    } else {
+                                    } else {*/
                                         minCost = (problem.costs[i][j][m][t] / problem.n[m]);
                                         min_i = i;
                                         min_m = m;
                                         min_t = t;
-                                    }
+                                    //}
                                 }
 
                             }

@@ -97,7 +97,7 @@ int main(int argc,char *argv[]){
                 }
             }
         }
-        srand(time(NULL));
+        srand(hash3(time(0), chrono::high_resolution_clock::now().time_since_epoch().count(), 1));
         bestScore = 10000000;
         struct timeval;
 
