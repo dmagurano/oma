@@ -5,6 +5,8 @@
 #include <ctime>
 #include "heuristic.h"
 
+
+
 using namespace std;
 
 int myrand1(int i) {
@@ -474,7 +476,7 @@ void Heuristic::replaceSolution(int ****newS) {
 }
 
 
-float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
+float Heuristic::solveWinner(vector<int>& indexes, int ****solution, clock_t startTime)
 {
     int i, j, m, t, w;
     bool notSatisfied;
@@ -486,13 +488,13 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
 
     int  objfun = 0;
     Data problem = getProblem();
-
-    bool notSolved = true;
     clock_t tStart = clock();
+    bool notSolved = true;
+
 
     float p;
     if(nCells > 100)
-        p = 0.25;
+        p = 0.15;
     else
         p=0.5;
 
@@ -517,6 +519,10 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
             //notSatisfied = true;
             int demand = problem.activities[j];
             while (demand > 0){
+                if (((double)(clock() - startTime) / CLOCKS_PER_SEC ) >= MAIN_TIME)
+                {
+                    return 10000000;
+                }
 
                 // w -> dim|i-j|
                 int minCost = 100000;
@@ -525,6 +531,7 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
                 int min_t = 0;
                 for (w = 1; w < nCells; w++)
                 {
+
 //                if (j - w < 0 && j + w >= nCells) {
 //                    //feasible = false;
 //                    break;
@@ -540,6 +547,7 @@ float Heuristic::solveWinner(vector<int>& indexes, int ****solution)
 
                         for (t = 0; t < nTimeSteps; t++)
                         {
+
 
                             if (!(j - w < 0))
                             {

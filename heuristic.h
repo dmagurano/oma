@@ -11,6 +11,7 @@
 #include <map>
 #include <chrono>
 #include <cstring>
+#define MAIN_TIME 4.95
 
 using namespace std;
 
@@ -173,7 +174,7 @@ public:
         return p;
     }
 
-    float solveWinner(vector<int>& indexes, int ****solution);
+    float solveWinner(vector<int>& indexes, int ****solution, clock_t startTime);
     void replaceSolution(int ****newS);
 };
 
